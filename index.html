@@ -126,7 +126,7 @@ textarea.prose{font-family:var(--prose);font-size:17px;line-height:1.7;min-heigh
 .meter i{display:block;height:100%;background:var(--red)}
 
 .matrix{overflow-x:auto}
-.matrix table{border-collapse:collapse;width:100%;min-width:560px}
+.matrix table{border-collapse:collapse;width:100%;min-width:820px}
 .matrix th,.matrix td{padding:10px 12px;border-bottom:1px solid var(--hair);text-align:left;font-size:13.5px;vertical-align:top}
 .matrix th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);font-weight:500}
 .matrix td.cell{width:15%}
@@ -172,6 +172,17 @@ textarea.prose{font-family:var(--prose);font-size:17px;line-height:1.7;min-heigh
 .actband p{margin:0;max-width:44ch;font-size:15px}
 .actband .shp{width:56px;height:56px;background:currentColor}
 .actband .shp.half{height:28px;border-radius:56px 56px 0 0;margin-top:0}
+.actname-wrap{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.actband input.actname{background:none;border:0;border-bottom:3px dashed transparent;color:inherit;width:100%;padding:0 0 4px;border-radius:0;cursor:text}
+.actband input.actname:hover{border-bottom-color:currentColor}
+.actband input.actname:focus{outline:none;border-bottom:3px solid currentColor}
+.actband input.actname::placeholder{color:inherit;opacity:.6}
+.renamehint{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;opacity:.8}
+
+/* overview: arc notes written straight into the matrix */
+.matrix textarea.arcnote{min-height:64px;font-size:13.5px;padding:7px 9px;line-height:1.45;cursor:text}
+.matrix textarea.arcnote::placeholder{color:var(--mute);opacity:.8}
+.matrix textarea.arcnote.filled{border-bottom-color:var(--red)}
 .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
 .card{background:var(--sheet);border:2px solid var(--ink);display:flex;flex-direction:column;min-width:0}
 .card .top{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:2px solid var(--ink)}
@@ -290,7 +301,9 @@ const mains=()=>chars().filter(c=>c.role==='main');
 const scenesIn=a=>Object.entries(model.scenes).map(([id,s])=>({id,...s})).filter(s=>s.act===a).sort((x,y)=>(x.order||0)-(y.order||0));
 const allScenes=()=>ACTS.flatMap((_,a)=>scenesIn(a));
 const sceneWords=s=>words(s.draft);
-function sceneLabel(id){const s=model.scenes[id];if(!s)return'';const n=scenesIn(s.act).findIndex(x=>x.id===id)+1;return `${ACTS[s.act].name} ${n}: ${s.title||'Untitled scene'}`}
+// Act titles can be renamed; a blank custom name falls back to the default.
+const actName=i=>{const v=String((model.project.actNames||[])[i]||'').trim();return v||ACTS[i].name};
+function sceneLabel(id){const s=model.scenes[id];if(!s)return'';const n=scenesIn(s.act).findIndex(x=>x.id===id)+1;return `${actName(s.act)} ${n}: ${s.title||'Untitled scene'}`}
 function shape(sh,col,extra=''){return `<i class="shp ${sh} ${col} ${extra}" aria-hidden="true"></i>`}
 
 /* ---------- persistence ---------- */
@@ -384,7 +397,7 @@ function renderBinder(){
   h+=`<div class="grp"><span>Acts</span><span>${Object.keys(model.scenes).length} scenes</span></div>`;
   ACTS.forEach((a,i)=>{
     const sc=scenesIn(i);
-    h+=`<button class="node${on('act',i)}" data-go="act" data-id="${i}">${shape(a.shape,a.col)}<span class="lbl">${a.name}</span><span class="ct">${sc.length}</span></button>`;
+    h+=`<button class="node${on('act',i)}" data-go="act" data-id="${i}">${shape(a.shape,a.col)}<span class="lbl">${esc(actName(i))}</span><span class="ct">${sc.length}</span></button>`;
     sc.forEach((s,j)=>h+=`<button class="node sub${on('scene',s.id)}" data-go="scene" data-id="${s.id}"><span class="num">${j+1}</span><span class="lbl">${esc(s.title||'Untitled scene')}</span></button>`);
   });
   b.innerHTML=h+'</nav>';setSaving();
@@ -417,19 +430,19 @@ function vOverview(){
   const total=sc.reduce((n,s)=>n+sceneWords(s),0),target=+p.target||0;
   const heights=[46,72,100,72,46];
   const stepH=ACTS.map((a,i)=>{const s=scenesIn(i),w=s.reduce((n,x)=>n+sceneWords(x),0);
-    return `<button class="step a${i}${i===4?' alt':''}" style="height:${heights[i]}%" data-go="act" data-id="${i}" aria-label="${a.name}, ${s.length} scenes">
-      <b>${a.name}</b><span><span class="n">${s.length}</span><br><small>${s.length===1?'scene':'scenes'} · ${fmt(w)} w</small></span></button>`}).join('');
+    return `<button class="step a${i}${i===4?' alt':''}" style="height:${heights[i]}%" data-go="act" data-id="${i}" aria-label="${esc(actName(i))}, ${s.length} scenes">
+      <b>${esc(actName(i))}</b><span><span class="n">${s.length}</span><br><small>${s.length===1?'scene':'scenes'} · ${fmt(w)} w</small></span></button>`}).join('');
   const ms=mains();
   const matrix=ms.length?`<div class="matrix"><table><thead><tr><th>Main character</th>${ARC.map((b,i)=>`<th>${i+1}. ${b.name}</th>`).join('')}</tr></thead><tbody>${
     ms.map(c=>`<tr><td><span class="who" data-go="character" data-id="${c.id}">${esc(c.name||'Unnamed')}</span></td>${ARC.map((_,i)=>{const b=(c.arc||[])[i]||{};
-      return `<td class="cell"><span class="dot${b.note?' full':''}" title="${b.note?'Written':'Not written yet'}"></span>${b.sceneId&&model.scenes[b.sceneId]?`<span class="s">${esc(sceneLabel(b.sceneId))}</span>`:''}</td>`}).join('')}</tr>`).join('')
+      return `<td class="cell"><textarea class="t arcnote${b.note?' filled':''}" id="m-${c.id}-${i}" ${bind('characters',c.id,`arc.${i}.note`)} aria-label="${esc(c.name||'Unnamed')}: ${ARC[i].name}" placeholder="What happens to them here…">${esc(b.note)}</textarea>${b.sceneId&&model.scenes[b.sceneId]?`<span class="s">${esc(sceneLabel(b.sceneId))}</span>`:''}</td>`}).join('')}</tr>`).join('')
   }</tbody></table></div>`:`<div class="empty">No main characters yet. Their five-point arcs will be tracked here.<button class="btn sm" data-act="add-char" data-role="main">Add main character</button></div>`;
   const cnt=r=>cs.filter(c=>c.role===r).length;
   return `
   <div class="eyebrow">Overview</div>
   <input class="bigtitle" id="p-title" placeholder="Name your novel" value="${esc(p.title)}" ${bind('project','','title')} aria-label="Novel title">
   <section class="block">
-    <header><h2>Five-act structure</h2><p>Freytag's pyramid. Tap an act to open its corkboard.</p></header>
+    <header><h2>Five-act structure</h2><p>Freytag's pyramid. Tap an act to open its corkboard, where you can also rename it.</p></header>
     <div class="pyramid">${stepH}</div>
     <div class="pyrfoot">${ACTS.map((_,i)=>`<span>Act ${['I','II','III','IV','V'][i]}</span>`).join('')}</div>
     <div class="stats">
@@ -452,7 +465,7 @@ function vOverview(){
     </div>
   </section>
   <section class="block">
-    <header><h2>Character arcs</h2><p>A filled dot means that beat is written. Scene names show where the beat lands.</p></header>
+    <header><h2>Character arcs</h2><p>Click a box and write what happens to that character at each stage. Notes save as you type and also appear on the character's own page. Scene names show where the beat lands.</p></header>
     <div class="body">${matrix}</div>
   </section>
   <section class="block">
@@ -479,7 +492,7 @@ function vCharacters(){
 }
 function vCharacter(id){
   const c=model.characters[id],R=ROLES[c.role]||ROLES.bit;
-  const opts=sel=>`<option value="">No scene linked</option>`+ACTS.map((a,i)=>{const s=scenesIn(i);return s.length?`<optgroup label="${a.name}">${s.map((x,j)=>`<option value="${x.id}"${x.id===sel?' selected':''}>${j+1}. ${esc(x.title||'Untitled scene')}</option>`).join('')}</optgroup>`:''}).join('');
+  const opts=sel=>`<option value="">No scene linked</option>`+ACTS.map((a,i)=>{const s=scenesIn(i);return s.length?`<optgroup label="${esc(actName(i))}">${s.map((x,j)=>`<option value="${x.id}"${x.id===sel?' selected':''}>${j+1}. ${esc(x.title||'Untitled scene')}</option>`).join('')}</optgroup>`:''}).join('');
   const learned=allScenes().filter(s=>s.learn&&s.learn[id]&&s.learn[id].trim());
   const inScenes=allScenes().filter(s=>(s.cast||[]).includes(id)||s.pov===id);
   let h=`<div class="eyebrow"><a data-go="characters">Characters</a> / ${R.one}</div>
@@ -501,7 +514,7 @@ function vCharacter(id){
       <textarea class="t" id="arc-${i}" ${bind('characters',id,`arc.${i}.note`)} aria-label="${b.name}">${esc((arc[i]||{}).note)}</textarea>
       <select class="t" id="arcs-${i}" ${bind('characters',id,`arc.${i}.sceneId`)} aria-label="Scene for ${b.name}">${opts((arc[i]||{}).sceneId)}</select></div>`).join('')}</div></section>
     <section class="block"><header><h2>What ${esc(c.name||'they')} learns, scene by scene</h2><p>Collected from each scene's “What the main characters learn” notes.</p></header><div class="body">
-      ${learned.length?`<div class="learnlist">${learned.map(s=>`<div class="li"><div><small>${ACTS[s.act].name}</small><a data-go="scene" data-id="${s.id}">${esc(s.title||'Untitled scene')}</a></div><div>${esc(s.learn[id])}</div></div>`).join('')}</div>`:`<p class="hint">Nothing recorded yet. Open a scene and fill in what ${esc(c.name||'this character')} learns.</p>`}
+      ${learned.length?`<div class="learnlist">${learned.map(s=>`<div class="li"><div><small>${esc(actName(s.act))}</small><a data-go="scene" data-id="${s.id}">${esc(s.title||'Untitled scene')}</a></div><div>${esc(s.learn[id])}</div></div>`).join('')}</div>`:`<p class="hint">Nothing recorded yet. Open a scene and fill in what ${esc(c.name||'this character')} learns.</p>`}
     </div></section>`;
   } else {
     h+=`<section class="block"><header><h2>Appears in</h2></header><div class="body">${inScenes.length?`<div class="chips">${inScenes.map(s=>`<button class="chip" data-go="scene" data-id="${s.id}">${shape(ACTS[s.act].shape,ACTS[s.act].col)}${esc(s.title||'Untitled scene')}</button>`).join('')}</div>`:`<p class="hint">Not in any scene yet. Add them to a scene's cast.</p>`}</div></section>`;
@@ -515,7 +528,10 @@ function vAct(a){
   const A=ACTS[a],sc=scenesIn(a),cs=model.characters;
   const fg=a===1?'var(--on-y)':a===3?'var(--paper)':'var(--on-c)';
   return `<div class="eyebrow">Act ${['I','II','III','IV','V'][a]} of V</div>
-  <section class="block a${a}"><div class="actband" style="color:${fg}"><i class="shp ${A.shape}" aria-hidden="true"></i><div><div class="big">${A.name}</div><p>${A.hint}</p></div></div></section>
+  <section class="block a${a}"><div class="actband" style="color:${fg}"><i class="shp ${A.shape}" aria-hidden="true"></i><div class="actname-wrap">
+    <input class="big actname" id="act-name-${a}" value="${esc(((model.project.actNames||[])[a])||'')}" placeholder="${esc(A.name)}" ${bind('project','',`actNames.${a}`)} aria-label="Act ${a+1} title" title="Click to rename this act">
+    <span class="renamehint">Click the title to rename this act · leave it blank to go back to “${esc(A.name)}”</span>
+    <p>${A.hint}</p></div></div></section>
   <div class="board">${sc.map((s,j)=>`<article class="card">
     <div class="top"><span class="no">${j+1}</span><span class="pill st${s.status||0}">${STATUS[s.status||0]}</span><span class="spacer"></span>
       <button class="ico" data-act="move" data-id="${s.id}" data-dir="-1" ${j===0?'disabled':''} aria-label="Move earlier">←</button>
@@ -523,7 +539,7 @@ function vAct(a){
     <button class="open" data-go="scene" data-id="${s.id}"><b>${esc(s.title||'Untitled scene')}</b><span>${esc(s.summary||s.plot||'No synopsis yet.')}</span></button>
     <div class="meta">${s.pov&&cs[s.pov]?`<span>POV ${esc(cs[s.pov].name)}</span>`:''}<span>${(s.flash||[]).length} flash</span><span>${fmt(sceneWords(s))} w</span>${s.location?`<span>${esc(s.location)}</span>`:''}</div>
   </article>`).join('')}
-  <button class="addcard" data-act="add-scene" data-id="${a}"><span><span class="plus">+</span>New scene in ${A.name}</span></button></div>`;
+  <button class="addcard" data-act="add-scene" data-id="${a}"><span><span class="plus">+</span>New scene in ${esc(actName(a))}</span></button></div>`;
 }
 
 /* ---------- scene ---------- */
@@ -532,14 +548,14 @@ function vScene(id){
   const flat=allScenes(),fi=flat.findIndex(x=>x.id===id),prev=flat[fi-1],next=flat[fi+1];
   const cs=chars(),ms=mains(),cast=s.cast||[],learn=s.learn||{};
   const sec=(n,cls,title,hint)=>`<header><span class="secno a${cls}">${n}</span><h2>${title}</h2>${hint?`<p>${hint}</p>`:''}</header>`;
-  let h=`<div class="eyebrow"><a data-go="act" data-id="${s.act}">${A.name}</a> / Scene ${idx+1} of ${list.length}</div>
+  let h=`<div class="eyebrow"><a data-go="act" data-id="${s.act}">${esc(actName(s.act))}</a> / Scene ${idx+1} of ${list.length}</div>
   <input class="bigtitle" id="s-title" placeholder="Scene title" value="${esc(s.title)}" ${bind('scenes',id,'title')} aria-label="Scene title">
   <section class="block"><div class="body">
     <label class="f"><span>Synopsis (index card)</span><textarea class="t" id="s-summary" ${bind('scenes',id,'summary')} placeholder="What happens, in two or three lines.">${esc(s.summary)}</textarea></label>
     <div class="cols">
       <label class="f"><span>Status</span><select class="t" id="s-status" data-change="scenes|${id}|status">${STATUS.map((x,i)=>`<option value="${i}"${(s.status||0)==i?' selected':''}>${x}</option>`).join('')}</select></label>
       <label class="f"><span>Point of view</span><select class="t" id="s-pov" data-change="scenes|${id}|pov"><option value="">None set</option>${cs.map(c=>`<option value="${c.id}"${s.pov===c.id?' selected':''}>${esc(c.name||'Unnamed')}</option>`).join('')}</select></label>
-      <label class="f"><span>Act</span><select class="t" id="s-act" data-act-move="${id}">${ACTS.map((x,i)=>`<option value="${i}"${s.act===i?' selected':''}>${x.name}</option>`).join('')}</select></label>
+      <label class="f"><span>Act</span><select class="t" id="s-act" data-act-move="${id}">${ACTS.map((x,i)=>`<option value="${i}"${s.act===i?' selected':''}>${esc(actName(i))}</option>`).join('')}</select></label>
     </div>
     <div class="f"><label class="f"><span>Cast in this scene</span></label>${cs.length?`<div class="chips">${cs.map(c=>`<button class="chip" data-act="cast" data-id="${c.id}" aria-pressed="${cast.includes(c.id)}">${shape(ROLES[c.role].shape,ROLES[c.role].col)}${esc(c.name||'Unnamed')}</button>`).join('')}</div>`:`<p class="hint">No characters yet. <a data-go="characters" style="cursor:pointer;text-decoration:underline">Add your cast</a>.</p>`}</div>
   </div></section>
@@ -614,8 +630,9 @@ document.addEventListener('input',e=>{
   let v=el.value;if(path==='target')v=v===''?'':+v;
   setPath(t,path,v);touch(col,id);
   if(el.tagName==='TEXTAREA')grow(el);
+  if(el.classList.contains('arcnote'))el.classList.toggle('filled',!!v.trim());
   if(path==='draft'){const w=$('#wc');if(w)w.textContent=fmt(words(v))+' words'}
-  if(path==='title'||path==='name'){clearTimeout(binderT);binderT=setTimeout(renderBinder,200)}
+  if(path==='title'||path==='name'||path.startsWith('actNames.')){clearTimeout(binderT);binderT=setTimeout(renderBinder,200)}
 });
 document.addEventListener('change',e=>{
   const el=e.target;
@@ -623,7 +640,7 @@ document.addEventListener('change',e=>{
   if(guard())return;
   if(el.dataset.bind&&el.tagName==='SELECT'){const [col,id,path]=el.dataset.bind.split('|');setPath(target(col,id),path,el.value);touch(col,id);el.blur();refresh();return}
   if(el.dataset.change){const [col,id,path]=el.dataset.change.split('|');target(col,id)[path]=path==='status'?+el.value:el.value;touch(col,id);el.blur();renderAll();return}
-  if(el.dataset.actMove){const id=el.dataset.actMove,s=model.scenes[id],a=+el.value,sc=scenesIn(a).filter(x=>x.id!==id);s.act=a;s.order=sc.length?Math.max(...sc.map(x=>x.order||0))+1:1;touch('scenes',id);el.blur();renderAll();toast(`Moved to the end of ${ACTS[a].name}`)}
+  if(el.dataset.actMove){const id=el.dataset.actMove,s=model.scenes[id],a=+el.value,sc=scenesIn(a).filter(x=>x.id!==id);s.act=a;s.order=sc.length?Math.max(...sc.map(x=>x.order||0))+1:1;touch('scenes',id);el.blur();renderAll();toast(`Moved to the end of ${actName(a)}`)}
 });
 document.addEventListener('toggle',e=>{const d=e.target;if(d.id&&d.id.startsWith('draft-')){const s=model.scenes[d.id.slice(6)];if(s&&!!s.draftOpen!==d.open){s.draftOpen=d.open;touch('scenes',d.id.slice(6))}}},true);
 document.addEventListener('click',async e=>{
@@ -758,7 +775,7 @@ function compile(){
   for(const r of ['main','sub','bit']){const list=chars().filter(c=>c.role===r);if(!list.length)continue;L.push(`### ${ROLES[r].label}`,'');
     for(const c of list){L.push(`#### ${c.name||'Unnamed'}`,'');q('Description',c.tagline);q('Want',c.want);q('Need',c.need);q('Flaw',c.flaw);q('Role',c.purpose);q('Notes',c.notes);
       if(r==='main')ARC.forEach((b,i)=>{const x=(c.arc||[])[i]||{};if(x.note||x.sceneId)L.push(`${i+1}. **${b.name}**${x.sceneId&&model.scenes[x.sceneId]?` (${sceneLabel(x.sceneId)})`:''}: ${x.note||''}`)});L.push('')}}
-  ACTS.forEach((A,a)=>{L.push(`## Act ${['I','II','III','IV','V'][a]}: ${A.name}`,'');
+  ACTS.forEach((A,a)=>{L.push(`## Act ${['I','II','III','IV','V'][a]}: ${actName(a)}`,'');
     scenesIn(a).forEach((s,j)=>{L.push(`### Scene ${j+1}: ${s.title||'Untitled scene'}`,'');L.push(`*${STATUS[s.status||0]}${s.pov&&model.characters[s.pov]?` · POV ${model.characters[s.pov].name}`:''}*`,'');
       q('Synopsis',s.summary);q('Location',s.location);q('World-building',s.world);
       for(const c of mains())q(`${c.name||'Unnamed'} learns`,(s.learn||{})[c.id]);
