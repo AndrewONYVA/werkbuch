@@ -246,6 +246,7 @@ details.draft .tog{font-family:var(--mono);font-size:12px;color:var(--mute)}
 </div>
 <div class="toast" id="toast" hidden></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 const ACTS=[
   {name:'Exposition',hint:'Set out the world, the cast and the status quo before anything breaks.',shape:'',col:'c-blu'},
@@ -443,6 +444,7 @@ function vOverview(){
     <div class="body">
       <label class="f"><span>Premise</span><textarea class="t" id="p-premise" ${bind('project','','premise')} placeholder="One or two sentences: who wants what, what stands in the way, what is at stake.">${esc(p.premise)}</textarea></label>
       <div class="cols">
+        <label class="f"><span>Author</span><input class="t" id="p-author" ${bind('project','','author')} value="${esc(p.author)}" placeholder="Name on the title page"></label>
         <label class="f"><span>Genre</span><input class="t" id="p-genre" ${bind('project','','genre')} value="${esc(p.genre)}" placeholder="e.g. Literary thriller"></label>
         <label class="f"><span>Theme</span><input class="t" id="p-theme" ${bind('project','','theme')} value="${esc(p.theme)}" placeholder="e.g. Loyalty costs more than betrayal"></label>
         <label class="f"><span>Target word count</span><input class="t" id="p-target" type="number" min="0" step="1000" ${bind('project','','target')} value="${esc(p.target)}" placeholder="80000"></label>
@@ -454,9 +456,10 @@ function vOverview(){
     <div class="body">${matrix}</div>
   </section>
   <section class="block">
-    <header><h2>Compile</h2><p>Export the whole plan (characters, arcs, acts, scenes, flash parts and drafts) as one Markdown file.</p></header>
+    <header><h2>Compile</h2><p>Export the manuscript as a Word document (title page, then one chapter per scene, set in Garamond at 6 × 9 inches), or the whole plan as one Markdown file.</p></header>
     <div class="body"><div class="row">
-      <button class="btn primary" data-act="compile">Compile outline (.md)</button>
+      <button class="btn primary" data-act="docx">Export manuscript (.docx)</button>
+      <button class="btn" data-act="compile">Compile outline (.md)</button>
       ${mode==='local'?`<button class="btn" data-act="backup">Back up (.json)</button>
       <label class="btn" for="restore-file">Restore backup</label><input type="file" id="restore-file" accept=".json,application/json" hidden>`:''}
       <span class="spacer"></span>
@@ -631,6 +634,7 @@ document.addEventListener('click',async e=>{
   if(a==='nav'){$('#binder').classList.toggle('open');renderBinder();return}
   if(a==='compile'){compile();return}
   if(a==='backup'){backup();return}
+  if(a==='docx'){exportDocx(b);return}
   if(guard())return;
   if(a==='add-char')newChar(b.dataset.role);
   else if(a==='add-scene')newScene(+b.dataset.id);
@@ -667,6 +671,83 @@ function restore(file){
       saveLocal();go({type:'project'});toast('Backup restored.')}
     catch{toast('That file is not a Werkbuch backup. Choose a .json file made with Back up.')}};
   r.readAsText(file);
+}
+
+/* docx:start */
+// Word manuscript: a title page, then one chapter per scene in reading order. Pure: returns {path: xml}.
+function buildDocx(p,scenes){
+  const X=s=>String(s??'').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const W='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  const runs=t=>t.split(/(\*[^*\n]+\*)/).filter(Boolean).map(x=>{const it=/^\*[^*]+\*$/.test(x);
+    return `<w:r>${it?'<w:rPr><w:i/></w:rPr>':''}<w:t xml:space="preserve">${X(it?x.slice(1,-1):x)}</w:t></w:r>`}).join('');
+  const P=(style,inner)=>`<w:p><w:pPr><w:pStyle w:val="${style}"/></w:pPr>${inner}</w:p>`;
+  const T=(style,text)=>P(style,`<w:r><w:t xml:space="preserve">${X(text)}</w:t></w:r>`);
+  const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  const num=n=>n<20?ones[n]:n<100?tens[Math.floor(n/10)]+(n%10?'-'+ones[n%10]:''):String(n);
+  const count=s=>(String(s||'').trim().match(/\S+/g)||[]).length;
+  const total=scenes.reduce((n,s)=>n+count(s.draft),0);
+  const title=p.title||'Untitled novel';
+
+  let body=T('Title',title);
+  if(p.genre)body+=T('Subtitle',p.genre);
+  if(p.author)body+=T('Author',p.author);
+  body+=T('TitleMeta',total?`Approximately ${(Math.round(total/100)*100||total).toLocaleString('en-GB')} words`:'Draft manuscript');
+  scenes.forEach((s,i)=>{
+    body+=T('ChapterNum',`Chapter ${num(i+1)}`)+T('Heading1',s.title||'Untitled');
+    const lines=String(s.draft||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    if(!lines.length){body+=P('Synopsis',runs(`Not yet drafted. ${s.summary||''}`.trim()));return}
+    let first=true;
+    for(const l of lines){
+      if(/^(?:[*#~]\s*){1,5}$|^⁂$|^-{3,}$/.test(l)){body+=T('SceneBreak','⁂');first=true;continue}
+      body+=P(first?'FirstPara':'BodyText',runs(l));first=false;
+    }
+  });
+  const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${W}><w:body>${body}<w:sectPr><w:footerReference w:type="default" r:id="rId2"/><w:pgSz w:w="8640" w:h="12960"/><w:pgMar w:top="1080" w:right="1008" w:bottom="1080" w:left="1224" w:header="576" w:footer="576" w:gutter="0"/><w:titlePg/></w:sectPr></w:body></w:document>`;
+  const st=(id,name,based,ppr,rpr,extra='')=>`<w:style w:type="paragraph" w:styleId="${id}"><w:name w:val="${name}"/>${based?`<w:basedOn w:val="${based}"/>`:''}${extra}<w:qFormat/>${ppr?`<w:pPr>${ppr}</w:pPr>`:''}${rpr?`<w:rPr>${rpr}</w:rPr>`:''}</w:style>`;
+  const font='<w:rFonts w:ascii="Garamond" w:hAnsi="Garamond" w:eastAsia="Garamond" w:cs="Garamond"/>';
+  const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ${W}>
+<w:docDefaults><w:rPrDefault><w:rPr>${font}<w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-GB"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="312" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
+${st('BodyText','Body Text','Normal','<w:widowControl/><w:ind w:firstLine="340"/><w:jc w:val="both"/>','')}
+${st('FirstPara','First Paragraph','BodyText','<w:ind w:firstLine="0"/>','')}
+${st('Title','Title','Normal','<w:spacing w:before="3200" w:after="240"/><w:jc w:val="center"/>','<w:spacing w:val="10"/><w:sz w:val="64"/><w:szCs w:val="64"/>')}
+${st('Subtitle','Subtitle','Normal','<w:spacing w:after="1200"/><w:jc w:val="center"/>','<w:i/><w:sz w:val="28"/><w:szCs w:val="28"/>')}
+${st('Author','Author','Normal','<w:spacing w:before="600"/><w:jc w:val="center"/>','<w:smallCaps/><w:spacing w:val="40"/><w:sz w:val="30"/><w:szCs w:val="30"/>')}
+${st('TitleMeta','Title Meta','Normal','<w:spacing w:before="3000"/><w:jc w:val="center"/>','<w:color w:val="595959"/><w:sz w:val="20"/><w:szCs w:val="20"/>')}
+${st('ChapterNum','Chapter Number','Normal','<w:keepNext/><w:pageBreakBefore/><w:spacing w:before="2160" w:after="160"/><w:jc w:val="center"/>','<w:smallCaps/><w:spacing w:val="60"/><w:color w:val="595959"/><w:sz w:val="22"/><w:szCs w:val="22"/>')}
+${st('Heading1','heading 1','Normal','<w:keepNext/><w:spacing w:after="720"/><w:jc w:val="center"/><w:outlineLvl w:val="0"/>','<w:sz w:val="40"/><w:szCs w:val="40"/>','<w:next w:val="FirstPara"/>')}
+${st('SceneBreak','Scene Break','Normal','<w:keepNext/><w:spacing w:before="240" w:after="240"/><w:jc w:val="center"/>','')}
+${st('Synopsis','Synopsis','Normal','<w:jc w:val="both"/>','<w:i/><w:color w:val="7F7F7F"/>')}
+${st('Footer','footer','Normal','<w:jc w:val="center"/>','<w:sz w:val="20"/><w:szCs w:val="20"/>')}
+</w:styles>`;
+  const footer=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr ${W}><w:p><w:pPr><w:pStyle w:val="Footer"/></w:pPr><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>`;
+  const now=new Date().toISOString().replace(/\.\d+Z$/,'Z');
+  return {
+    '[Content_Types].xml':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`,
+    '_rels/.rels':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`,
+    'word/_rels/document.xml.rels':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/></Relationships>`,
+    'word/document.xml':doc,
+    'word/styles.xml':styles,
+    'word/settings.xml':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings ${W}><w:mirrorMargins/><w:defaultTabStop w:val="720"/><w:characterSpacingControl w:val="doNotCompress"/></w:settings>`,
+    'word/footer1.xml':footer,
+    'docProps/core.xml':`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${X(title)}</dc:title><dc:creator>${X(p.author||'')}</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified></cp:coreProperties>`
+  };
+}
+/* docx:end */
+async function exportDocx(btn){
+  if(!window.JSZip){toast('The Word exporter did not load. Check your connection and reload the page.');return}
+  const scenes=allScenes();if(!scenes.length){toast('Add a scene first. Each scene becomes a chapter.');return}
+  btn.disabled=true;
+  try{
+    const zip=new JSZip(),parts=buildDocx(model.project,scenes);
+    for(const [path,xml] of Object.entries(parts))zip.file(path,xml);
+    const blob=await zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    const name=(model.project.title||'novel').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-').toLowerCase()||'novel';
+    if(downloads){await downloads.save({filename:name+'-manuscript.docx',data:blob}).then(()=>toast('Manuscript saved.'),e=>{if(e&&e.code!=='declined')toast('The manuscript could not be saved here. Try again in a moment.')})}
+    else{saveBlob(name+'-manuscript.docx',blob,'application/vnd.openxmlformats-officedocument.wordprocessingml.document');toast('Manuscript downloaded.')}
+  }catch{toast('The manuscript could not be built. Try again, and tell Claude if it keeps failing.')}
+  finally{btn.disabled=false}
 }
 
 /* ---------- compile ---------- */
