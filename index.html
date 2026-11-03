@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Werkbuch Novel Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap">
+<style>
+:root{
+  /* Layout: a Scrivener-style binder rail on the left, a working sheet on the right built from flat primary blocks, hard 2px rules and the three Bauhaus shapes */
+  --paper:#F6F6F3; --sheet:#FFFFFF; --ink:#141414; --mute:#5D5F66; --hair:#D8D9DC; --field:#F1F1EE;
+  --red:#D52B1E; --yellow:#F3B800; --blue:#1F4FA3; --on-c:#FFFFFF; --on-y:#141414;
+  --display:'Jost',Futura,'Century Gothic','Avenir Next',sans-serif;
+  --body:'Jost',Futura,'Avenir Next','Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --prose:'Source Serif 4',Georgia,'Times New Roman',serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#111214; --sheet:#1A1B1E; --ink:#EEEDE8; --mute:#9EA0A7; --hair:#30323A; --field:#222327;
+  --red:#E5483D; --yellow:#F5C330; --blue:#4C80DA; --on-c:#FFFFFF; --on-y:#141414; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#111214; --sheet:#1A1B1E; --ink:#EEEDE8; --mute:#9EA0A7; --hair:#30323A; --field:#222327;
+  --red:#E5483D; --yellow:#F5C330; --blue:#4C80DA; --on-c:#FFFFFF; --on-y:#141414; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+
+.app{display:grid;grid-template-columns:276px minmax(0,1fr);min-height:100vh}
+
+/* ---------- binder ---------- */
+.binder{position:sticky;top:0;height:100vh;overflow:auto;background:var(--sheet);border-right:2px solid var(--ink);display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:12px;padding:18px 18px 14px;border-bottom:2px solid var(--ink)}
+.mark{display:grid;grid-template-columns:14px 14px 14px;gap:3px;flex:none}
+.mark i{width:14px;height:14px;display:block}
+.mark i:nth-child(1){background:var(--red);border-radius:50%}
+.mark i:nth-child(2){background:var(--yellow)}
+.mark i:nth-child(3){background:var(--blue);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.brand b{font-family:var(--display);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:15px}
+.brand small{display:block;font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.02em}
+.savestate{margin-left:auto;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);white-space:nowrap}
+.savestate.busy{color:var(--red)}
+.navtoggle{display:none}
+.tree{padding:10px 0 24px;display:flex;flex-direction:column}
+.grp{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--mute);padding:16px 18px 6px;display:flex;justify-content:space-between}
+.node{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;padding:6px 18px;cursor:pointer;min-height:32px;border-left:4px solid transparent}
+.node:hover{background:var(--field)}
+.node.on{background:var(--field);border-left-color:var(--ink);font-weight:600}
+.node .lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.node .ct{font-family:var(--mono);font-size:11px;color:var(--mute)}
+.node.sub{padding-left:42px;font-size:14px;min-height:28px}
+.node.sub .num{font-family:var(--mono);font-size:10.5px;color:var(--mute);width:18px;flex:none}
+
+/* ---------- shapes ---------- */
+.shp{width:12px;height:12px;flex:none;display:inline-block;background:currentColor}
+.circ{border-radius:50%}
+.tri{clip-path:polygon(50% 0,100% 100%,0 100%)}
+.tri-d{clip-path:polygon(0 0,100% 0,50% 100%)}
+.half{border-radius:12px 12px 0 0;height:7px;margin-top:5px}
+.c-red{color:var(--red)} .c-yel{color:var(--yellow)} .c-blu{color:var(--blue)} .c-ink{color:var(--ink)}
+
+/* ---------- main sheet ---------- */
+main{min-width:0;padding-block:28px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+.eyebrow{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--mute);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow a{color:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.bigtitle{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.01em;border:0;background:none;width:100%;padding:0;outline-offset:6px}
+.bigtitle::placeholder{color:var(--hair)}
+
+.block{background:var(--sheet);border:2px solid var(--ink)}
+.block>header{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:2px solid var(--ink);flex-wrap:wrap}
+.block>header h2{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.block>header p{margin:0;color:var(--mute);font-size:13.5px;flex-basis:100%}
+.block>.body{padding:18px;display:flex;flex-direction:column;gap:16px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.cols>*{min-width:0}
+
+label.f{display:flex;flex-direction:column;gap:6px;min-width:0}
+label.f>span{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+input.t,textarea.t,select.t{width:100%;background:var(--field);border:0;border-bottom:2px solid var(--hair);padding:9px 11px;border-radius:0;min-width:0}
+input.t:focus,textarea.t:focus,select.t:focus{border-bottom-color:var(--blue);outline:none;background:var(--sheet);box-shadow:inset 0 0 0 1px var(--hair)}
+textarea.t{resize:vertical;min-height:72px;field-sizing:content;line-height:1.55}
+textarea.prose{font-family:var(--prose);font-size:17px;line-height:1.7;min-height:220px;padding:16px 18px}
+.hint{font-size:13px;color:var(--mute);margin:0}
+
+.btn{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--ink);background:var(--sheet);padding:7px 14px;cursor:pointer;font-weight:600;font-size:14px;min-height:38px}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn.primary:hover{background:var(--blue);border-color:var(--blue);color:var(--on-c)}
+.btn.ghost{border-color:transparent;background:none}
+.btn.ghost:hover{background:var(--field);color:var(--ink)}
+.btn.danger{border-color:var(--red);color:var(--red);background:none}
+.btn.danger:hover,.btn.danger[data-armed]{background:var(--red);color:var(--on-c)}
+.btn.sm{min-height:30px;padding:3px 10px;font-size:13px}
+.ico{width:30px;height:30px;border:2px solid var(--ink);background:var(--sheet);cursor:pointer;display:inline-grid;place-items:center;font-family:var(--mono);font-size:14px;padding:0}
+.ico:hover{background:var(--ink);color:var(--paper)}
+.ico:disabled{opacity:.3;cursor:default;background:var(--sheet);color:var(--ink)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+
+/* ---------- overview: stepped pyramid ---------- */
+.pyramid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:end;gap:6px;height:260px;padding:18px 18px 0;border-bottom:2px solid var(--ink)}
+.step{display:flex;flex-direction:column;justify-content:space-between;padding:12px;cursor:pointer;border:0;text-align:left;min-width:0;transition:transform .15s}
+.step:hover{transform:translateY(-4px)}
+.step b{font-family:var(--display);font-size:clamp(13px,1.6vw,17px);font-weight:700;line-height:1.1;text-transform:uppercase;letter-spacing:.04em;overflow-wrap:anywhere}
+.step .n{font-family:var(--display);font-size:clamp(26px,4vw,44px);font-weight:800;line-height:1}
+.step small{font-family:var(--mono);font-size:10.5px;opacity:.85}
+.a0{background:var(--blue);color:var(--on-c)} .a1{background:var(--yellow);color:var(--on-y)} .a2{background:var(--red);color:var(--on-c)} .a3{background:var(--ink);color:var(--paper)} .a4{background:var(--blue);color:var(--on-c)}
+.a4.alt{background:repeating-linear-gradient(135deg,var(--blue) 0 10px,color-mix(in srgb,var(--blue) 82%,var(--sheet)) 10px 20px)}
+.pyrfoot{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px 18px 14px;font-family:var(--mono);font-size:10.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-top:0}
+.stat{padding:16px 18px;border-right:2px solid var(--ink);display:flex;flex-direction:column;gap:2px}
+.stat:last-child{border-right:0}
+.stat .v{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .k{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+.meter{height:10px;background:var(--field);border:2px solid var(--ink);margin-top:8px}
+.meter i{display:block;height:100%;background:var(--red)}
+
+.matrix{overflow-x:auto}
+.matrix table{border-collapse:collapse;width:100%;min-width:560px}
+.matrix th,.matrix td{padding:10px 12px;border-bottom:1px solid var(--hair);text-align:left;font-size:13.5px;vertical-align:top}
+.matrix th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);font-weight:500}
+.matrix td.cell{width:15%}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);vertical-align:-2px}
+.dot.full{background:var(--red);border-color:var(--red)}
+.matrix .who{font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--hair)}
+.cell .s{display:block;font-family:var(--mono);font-size:10.5px;color:var(--mute);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+
+/* ---------- characters ---------- */
+.rolecols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;align-items:start}
+.rolecol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.rolehead{display:flex;align-items:center;gap:10px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.rolehead .shp{width:18px;height:18px}
+.rolehead h2{font-size:16px;text-transform:uppercase;letter-spacing:.08em;flex:1}
+.ccard{display:flex;gap:12px;align-items:flex-start;background:var(--sheet);border:2px solid var(--ink);padding:12px 14px;cursor:pointer;text-align:left;width:100%}
+.ccard:hover{box-shadow:5px 5px 0 var(--ink);transform:translate(-2px,-2px)}
+.ccard .shp{margin-top:5px}
+.ccard b{display:block;font-size:16px}
+.ccard span{display:block;color:var(--mute);font-size:13.5px}
+.empty{border:2px dashed var(--hair);padding:18px;color:var(--mute);font-size:14px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+
+.rolepick{display:flex;gap:0;flex-wrap:wrap}
+.rolepick button{display:flex;align-items:center;gap:8px;border:2px solid var(--ink);background:var(--sheet);padding:8px 14px;cursor:pointer;margin-right:-2px;font-weight:500}
+.rolepick button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.rolepick button[aria-pressed="true"] .shp{outline:2px solid var(--paper)}
+
+.arc{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border-top:2px solid var(--ink)}
+.beat{display:flex;flex-direction:column;gap:8px;padding:14px;border-right:2px solid var(--ink);min-width:0;position:relative}
+.beat:last-child{border-right:0}
+.beat .bn{font-family:var(--display);font-size:34px;font-weight:800;line-height:1}
+.beat h3{font-size:14px;text-transform:uppercase;letter-spacing:.06em}
+.beat p{font-size:12.5px;color:var(--mute);margin:0;min-height:3.6em}
+.beat:nth-child(1) .bn{color:var(--blue)} .beat:nth-child(2) .bn{color:var(--yellow)} .beat:nth-child(3) .bn{color:var(--red)} .beat:nth-child(4) .bn{color:var(--ink)} .beat:nth-child(5) .bn{color:var(--blue)}
+.arcline{display:block;width:100%;height:56px;padding:0 18px}
+.learnlist{display:flex;flex-direction:column;gap:0}
+.learnlist .li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid var(--hair)}
+.learnlist .li a{font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--hair)}
+.learnlist .li small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--mute);text-transform:uppercase}
+
+/* ---------- act corkboard ---------- */
+.actband{display:flex;gap:18px;align-items:flex-end;padding:22px;flex-wrap:wrap}
+.actband .big{font-family:var(--display);font-size:clamp(34px,6vw,64px);font-weight:800;line-height:.95;text-transform:uppercase;letter-spacing:-.01em}
+.actband p{margin:0;max-width:44ch;font-size:15px}
+.actband .shp{width:56px;height:56px;background:currentColor}
+.actband .shp.half{height:28px;border-radius:56px 56px 0 0;margin-top:0}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.card{background:var(--sheet);border:2px solid var(--ink);display:flex;flex-direction:column;min-width:0}
+.card .top{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:2px solid var(--ink)}
+.card .top .no{font-family:var(--display);font-weight:800;font-size:20px;line-height:1;width:34px}
+.card .open{all:unset;cursor:pointer;padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1;min-height:120px}
+.card .open:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+.card .open b{font-size:16.5px;line-height:1.25}
+.card .open span{font-size:13.5px;color:var(--mute);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.card .meta{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid var(--hair);font-family:var(--mono);font-size:10.5px;color:var(--mute);text-transform:uppercase}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border:1px solid currentColor;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.st0{color:var(--mute)} .st1{color:var(--blue)} .st2{color:var(--ink)} .st3{color:var(--red)} .st4{color:var(--on-y);background:var(--yellow);border-color:var(--yellow)}
+.addcard{border:2px dashed var(--ink);background:none;cursor:pointer;min-height:180px;display:grid;place-items:center;font-weight:600;font-size:15px}
+.addcard:hover{background:var(--sheet)}
+.addcard .plus{display:block;font-family:var(--display);font-size:42px;font-weight:400;line-height:1;text-align:center}
+
+/* ---------- scene ---------- */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:7px;border:2px solid var(--ink);background:var(--sheet);padding:4px 11px;cursor:pointer;font-size:13.5px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.ce{display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);align-items:stretch;gap:0}
+.ce .arrow{display:grid;place-items:center;font-family:var(--display);font-size:26px;font-weight:700}
+.secno{width:28px;height:28px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:15px;flex:none}
+.learn{display:grid;grid-template-columns:190px minmax(0,1fr);gap:14px;align-items:start}
+.learn .who{display:flex;gap:10px;align-items:center;padding-top:8px;font-weight:600;min-width:0}
+.learn .who span{overflow-wrap:anywhere}
+.flash{border:2px solid var(--ink);background:var(--paper)}
+.flash .fh{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:2px solid var(--ink);background:var(--sheet)}
+.flash .fh b{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:13.5px}
+.flash .fb{padding:14px;display:flex;flex-direction:column;gap:14px}
+.bolt{width:14px;height:18px;background:var(--yellow);clip-path:polygon(60% 0,0 58%,45% 58%,30% 100%,100% 38%,55% 38%);flex:none}
+.wc{font-family:var(--mono);font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+details.draft>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;padding:12px 18px;flex-wrap:wrap}
+details.draft>summary::-webkit-details-marker{display:none}
+details.draft>summary h2{font-size:15px;text-transform:uppercase;letter-spacing:.1em}
+details.draft[open]>summary{border-bottom:2px solid var(--ink)}
+details.draft .tog{font-family:var(--mono);font-size:12px;color:var(--mute)}
+
+.notice{border:2px solid var(--ink);background:var(--yellow);color:var(--on-y);padding:10px 14px;font-size:14px}
+.loading{display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding:40px 0}
+.loading .mark{animation:spin 1.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 16px;font-size:14px;max-width:min(380px,calc(100vw - 32px));z-index:20}
+
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .binder{position:static;height:auto;border-right:0;border-bottom:2px solid var(--ink)}
+  .brand{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .navtoggle{display:inline-flex}
+  .binder:not(.open) .tree{display:none}
+  .arc{grid-template-columns:minmax(0,1fr)}
+  .beat{border-right:0;border-bottom:2px solid var(--ink)}
+  .beat:last-child{border-bottom:0}
+  .beat p{min-height:0}
+  .arcline{display:none}
+  .pyramid{height:200px;gap:4px;padding:12px 12px 0}
+  .step{padding:8px 6px}
+  .step small{display:none}
+  .pyrfoot{padding:8px 12px 12px;gap:4px;font-size:9px}
+  .learn,.learnlist .li{grid-template-columns:minmax(0,1fr)}
+  .learn .who{padding-top:0}
+  .ce{grid-template-columns:minmax(0,1fr)}
+  .ce .arrow{transform:rotate(90deg);height:36px}
+  .stat{border-right:0;border-bottom:2px solid var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app">
+  <aside class="binder" id="binder"></aside>
+  <main id="main"><div class="wrap"><div class="loading"><div class="mark"><i></i><i></i><i></i></div><p class="hint">Opening your manuscript…</p></div></div></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const ACTS=[
+  {name:'Exposition',hint:'Set out the world, the cast and the status quo before anything breaks.',shape:'',col:'c-blu'},
+  {name:'Rising Action',hint:'Complications stack up. Every scene should raise the stakes or tighten the knot.',shape:'tri',col:'c-yel'},
+  {name:'Climax',hint:'The turning point. The protagonist meets the central conflict head-on.',shape:'circ',col:'c-red'},
+  {name:'Falling Action',hint:'Consequences land. Loose threads are pulled tight.',shape:'tri-d',col:'c-ink'},
+  {name:'Resolution',hint:'The new normal. Show what has changed and what it cost.',shape:'half',col:'c-blu'}
+];
+const ARC=[
+  {name:'Starting point',hint:'Who they are at the start: the flaw, the lie they believe, what they want.'},
+  {name:'Catalyst',hint:'The event that pushes them out of their old life.'},
+  {name:'Midpoint shift',hint:'They glimpse the truth and begin to act differently.'},
+  {name:'Crisis',hint:'Their lowest point. The old self and the new self collide.'},
+  {name:'Transformation',hint:'Who they become, shown through a choice or an action.'}
+];
+const ROLES={
+  main:{label:'Main characters',one:'Main character',shape:'circ',col:'c-red',add:'Add main character'},
+  sub:{label:'Sub-characters',one:'Sub-character',shape:'',col:'c-blu',add:'Add sub-character'},
+  bit:{label:'Bit-parts',one:'Bit-part',shape:'tri',col:'c-yel',add:'Add bit-part'}
+};
+const STATUS=['Idea','Outlined','Drafted','Revised','Final'];
+
+const model={project:{},characters:{},scenes:{}};
+let view=loadView();
+let mode='loading', db=null, downloads=null, loadNote='', readOnly=false;
+
+/* ---------- utilities ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const words=s=>(String(s||'').trim().match(/\S+/g)||[]).length;
+const fmt=n=>n.toLocaleString();
+const clone=o=>JSON.parse(JSON.stringify(o));
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3200)}
+function loadView(){try{return JSON.parse(localStorage.getItem('werkbuch-view'))||{type:'project'}}catch{return{type:'project'}}}
+function go(v){view=v;try{localStorage.setItem('werkbuch-view',JSON.stringify(v))}catch{}
+  if(window.innerWidth<=820)$('#binder').classList.remove('open');renderAll();window.scrollTo(0,0)}
+
+const chars=()=>Object.entries(model.characters).map(([id,c])=>({id,...c})).sort((a,b)=>(a.created||0)-(b.created||0));
+const mains=()=>chars().filter(c=>c.role==='main');
+const scenesIn=a=>Object.entries(model.scenes).map(([id,s])=>({id,...s})).filter(s=>s.act===a).sort((x,y)=>(x.order||0)-(y.order||0));
+const allScenes=()=>ACTS.flatMap((_,a)=>scenesIn(a));
+const sceneWords=s=>words(s.draft);
+function sceneLabel(id){const s=model.scenes[id];if(!s)return'';const n=scenesIn(s.act).findIndex(x=>x.id===id)+1;return `${ACTS[s.act].name} ${n}: ${s.title||'Untitled scene'}`}
+function shape(sh,col,extra=''){return `<i class="shp ${sh} ${col} ${extra}" aria-hidden="true"></i>`}
+
+/* ---------- persistence ---------- */
+const timers={},chains={},inflight={};const pending=new Set();
+function keyOf(col,id){return col==='project'?'project/main':col+'/'+id}
+function touch(col,id){
+  const k=keyOf(col,id);pending.add(k);clearTimeout(timers[k]);
+  timers[k]=setTimeout(()=>flush(k,col,id),700);setSaving();
+}
+function flush(k,col,id){
+  delete timers[k];
+  if(mode!=='db'){saveLocal();pending.delete(k);setSaving();return}
+  const data=col==='project'?model.project:model[col][id];
+  if(!data){pending.delete(k);setSaving();return}
+  const body=clone(data);inflight[k]=(inflight[k]||0)+1;
+  chains[k]=(chains[k]||Promise.resolve()).then(()=>db.doc(k).set(body)).catch(writeError).finally(()=>{
+    inflight[k]--;if(!inflight[k]&&!timers[k])pending.delete(k);setSaving();
+  });
+}
+function remove(col,id){
+  const k=keyOf(col,id);clearTimeout(timers[k]);delete timers[k];delete model[col][id];
+  if(mode!=='db'){saveLocal();pending.delete(k);return}
+  pending.add(k);inflight[k]=(inflight[k]||0)+1;setSaving();
+  chains[k]=(chains[k]||Promise.resolve()).then(()=>db.doc(k).delete()).catch(writeError).finally(()=>{
+    inflight[k]--;if(!inflight[k]&&!timers[k])pending.delete(k);setSaving();
+  });
+}
+function flushAll(){for(const k of Object.keys(timers)){clearTimeout(timers[k]);const [col,id]=k.split('/');flush(k,col==='project'?'project':col,id)}}
+addEventListener('pagehide',flushAll);
+addEventListener('visibilitychange',()=>{if(document.hidden)flushAll()});
+function writeError(e){
+  if(e&&e.code==='invalid_argument'&&!readOnly){readOnly=true;toast('You can view this novel but not change it. Ask the owner for edit access.');return}
+  if(e&&e.code==='quota_exceeded'){toast('The novel database is full. Delete some scenes or flash parts to make room.');return}
+  toast('A change did not save. Check your connection, then edit the field again.');
+}
+function setSaving(){
+  const el=$('#savestate');if(!el)return;
+  if(mode==='local'){el.textContent='This browser only';el.className='savestate';return}
+  const busy=pending.size>0;el.textContent=busy?'Saving…':'Saved';el.className='savestate'+(busy?' busy':'');
+}
+function saveLocal(){try{localStorage.setItem('werkbuch-data',JSON.stringify(model))}catch{}}
+function loadLocal(){try{const d=JSON.parse(localStorage.getItem('werkbuch-data'));if(d){Object.assign(model,{project:d.project||{},characters:d.characters||{},scenes:d.scenes||{}})}}catch{}}
+
+function editing(){const a=document.activeElement;return a&&$('#main').contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
+let refreshT;
+function refresh(){clearTimeout(refreshT);refreshT=setTimeout(()=>{renderBinder();if(!editing())renderMain()},60)}
+function applyCol(col,snap){
+  for(const ch of snap.docChanges()){
+    const k=col+'/'+ch.doc.id;if(pending.has(k))continue;
+    if(ch.type==='removed')delete model[col][ch.doc.id];else model[col][ch.doc.id]=clone(ch.doc.data());
+  }
+}
+async function boot(){
+  renderAll();
+  let ns=null;
+  try{ns=window.claude&&window.claude.use?await window.claude.use('db'):null}catch{ns=null}
+  try{downloads=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch{downloads=null}
+  if(!ns){mode='local';loadLocal();renderAll();return}
+  db=ns;
+  const seen={p:false,c:false,s:false};let confirmed={p:false,c:false,s:false};
+  const timer=setTimeout(()=>{if(!(confirmed.p&&confirmed.c&&confirmed.s)){loadNote='Your novel is taking longer than usual to load. What you see may be out of date.';renderAll()}},10000);
+  const tick=(key,snap)=>{seen[key]=true;if(!snap.metadata.fromCache)confirmed[key]=true;
+    if(seen.p&&seen.c&&seen.s&&mode!=='db'){mode='db';renderAll()}
+    if(confirmed.p&&confirmed.c&&confirmed.s&&loadNote){loadNote='';clearTimeout(timer);refresh()}
+    if(confirmed.p&&confirmed.c&&confirmed.s)clearTimeout(timer);
+  };
+  const fail=e=>{clearTimeout(timer);if(mode!=='db'){mode='db'}loadNote='Your novel could not be reached. Reload the page to try again.';renderAll()};
+  db.doc('project/main').onSnapshot(s=>{if(!pending.has('project/main'))model.project=s.exists?clone(s.data()):{};tick('p',s);refresh()},fail);
+  db.collection('characters').onSnapshot(s=>{applyCol('characters',s);tick('c',s);refresh()},fail);
+  db.collection('scenes').onSnapshot(s=>{applyCol('scenes',s);tick('s',s);refresh()},fail);
+}
+
+/* ---------- binder ---------- */
+function renderBinder(){
+  const b=$('#binder');const open=b.classList.contains('open');
+  const on=(t,id)=>view.type===t&&(id===undefined||view.id===id)?' on':'';
+  const cs=chars();
+  let h=`<div class="brand"><div class="mark"><i></i><i></i><i></i></div>
+    <div><b>Werkbuch</b><small>${esc(model.project.title||'Untitled novel')}</small></div>
+    <span class="savestate" id="savestate"></span>
+    <button class="btn sm navtoggle" data-act="nav" aria-expanded="${open}">${open?'Close':'Binder'}</button></div>
+  <nav class="tree" aria-label="Binder">
+    <div class="grp"><span>Manuscript</span></div>
+    <button class="node${on('project')}" data-go="project">${shape('','c-ink')}<span class="lbl">Overview</span></button>
+    <div class="grp"><span>Characters</span><span>${cs.length}</span></div>
+    <button class="node${on('characters')}" data-go="characters">${shape('circ','c-red')}<span class="lbl">All characters</span></button>`;
+  for(const c of cs.filter(c=>c.role==='main'))h+=`<button class="node sub${on('character',c.id)}" data-go="character" data-id="${c.id}">${shape('circ','c-red')}<span class="lbl">${esc(c.name||'Unnamed')}</span></button>`;
+  h+=`<div class="grp"><span>Acts</span><span>${Object.keys(model.scenes).length} scenes</span></div>`;
+  ACTS.forEach((a,i)=>{
+    const sc=scenesIn(i);
+    h+=`<button class="node${on('act',i)}" data-go="act" data-id="${i}">${shape(a.shape,a.col)}<span class="lbl">${a.name}</span><span class="ct">${sc.length}</span></button>`;
+    sc.forEach((s,j)=>h+=`<button class="node sub${on('scene',s.id)}" data-go="scene" data-id="${s.id}"><span class="num">${j+1}</span><span class="lbl">${esc(s.title||'Untitled scene')}</span></button>`);
+  });
+  b.innerHTML=h+'</nav>';setSaving();
+}
+
+/* ---------- main router ---------- */
+function renderAll(){renderBinder();renderMain()}
+function renderMain(){
+  const m=$('#main');
+  if(mode==='loading'){m.innerHTML=`<div class="wrap"><div class="loading"><div class="mark"><i></i><i></i><i></i></div><p class="hint">Opening your manuscript…</p></div></div>`;return}
+  let h='';
+  if(loadNote)h+=`<div class="notice">${esc(loadNote)}</div>`;
+  if(mode==='local')h+=`<div class="notice">Your novel is saved in this browser only. Use Back up on the Overview now and then to keep a copy you can restore anywhere.</div>`;
+  if(view.type==='character'&&!model.characters[view.id])view={type:'characters'};
+  if(view.type==='scene'&&!model.scenes[view.id])view={type:'project'};
+  if(view.type==='project')h+=vOverview();
+  else if(view.type==='characters')h+=vCharacters();
+  else if(view.type==='character')h+=vCharacter(view.id);
+  else if(view.type==='act')h+=vAct(+view.id);
+  else if(view.type==='scene')h+=vScene(view.id);
+  m.innerHTML=`<div class="wrap">${h}</div>`;
+  m.querySelectorAll('textarea.t').forEach(grow);
+}
+function grow(t){if(CSS.supports&&CSS.supports('field-sizing','content'))return;t.style.height='auto';t.style.height=Math.max(t.scrollHeight+4,72)+'px'}
+const bind=(col,id,path)=>`data-bind="${col}|${id||''}|${path}"`;
+
+/* ---------- overview ---------- */
+function vOverview(){
+  const p=model.project,cs=chars(),sc=allScenes();
+  const total=sc.reduce((n,s)=>n+sceneWords(s),0),target=+p.target||0;
+  const heights=[46,72,100,72,46];
+  const stepH=ACTS.map((a,i)=>{const s=scenesIn(i),w=s.reduce((n,x)=>n+sceneWords(x),0);
+    return `<button class="step a${i}${i===4?' alt':''}" style="height:${heights[i]}%" data-go="act" data-id="${i}" aria-label="${a.name}, ${s.length} scenes">
+      <b>${a.name}</b><span><span class="n">${s.length}</span><br><small>${s.length===1?'scene':'scenes'} · ${fmt(w)} w</small></span></button>`}).join('');
+  const ms=mains();
+  const matrix=ms.length?`<div class="matrix"><table><thead><tr><th>Main character</th>${ARC.map((b,i)=>`<th>${i+1}. ${b.name}</th>`).join('')}</tr></thead><tbody>${
+    ms.map(c=>`<tr><td><span class="who" data-go="character" data-id="${c.id}">${esc(c.name||'Unnamed')}</span></td>${ARC.map((_,i)=>{const b=(c.arc||[])[i]||{};
+      return `<td class="cell"><span class="dot${b.note?' full':''}" title="${b.note?'Written':'Not written yet'}"></span>${b.sceneId&&model.scenes[b.sceneId]?`<span class="s">${esc(sceneLabel(b.sceneId))}</span>`:''}</td>`}).join('')}</tr>`).join('')
+  }</tbody></table></div>`:`<div class="empty">No main characters yet. Their five-point arcs will be tracked here.<button class="btn sm" data-act="add-char" data-role="main">Add main character</button></div>`;
+  const cnt=r=>cs.filter(c=>c.role===r).length;
+  return `
+  <div class="eyebrow">Overview</div>
+  <input class="bigtitle" id="p-title" placeholder="Name your novel" value="${esc(p.title)}" ${bind('project','','title')} aria-label="Novel title">
+  <section class="block">
+    <header><h2>Five-act structure</h2><p>Freytag's pyramid. Tap an act to open its corkboard.</p></header>
+    <div class="pyramid">${stepH}</div>
+    <div class="pyrfoot">${ACTS.map((_,i)=>`<span>Act ${['I','II','III','IV','V'][i]}</span>`).join('')}</div>
+    <div class="stats">
+      <div class="stat"><span class="v">${fmt(total)}</span><span class="k">Words drafted${target?` of ${fmt(target)}`:''}</span>${target?`<div class="meter"><i style="width:${Math.min(100,total/target*100).toFixed(1)}%"></i></div>`:''}</div>
+      <div class="stat"><span class="v">${sc.length}</span><span class="k">Scenes</span></div>
+      <div class="stat"><span class="v">${sc.reduce((n,s)=>n+(s.flash||[]).length,0)}</span><span class="k">Flash parts</span></div>
+      <div class="stat"><span class="v">${cnt('main')} · ${cnt('sub')} · ${cnt('bit')}</span><span class="k">Main · sub · bit</span></div>
+    </div>
+  </section>
+  <section class="block">
+    <header><h2>The book</h2></header>
+    <div class="body">
+      <label class="f"><span>Premise</span><textarea class="t" id="p-premise" ${bind('project','','premise')} placeholder="One or two sentences: who wants what, what stands in the way, what is at stake.">${esc(p.premise)}</textarea></label>
+      <div class="cols">
+        <label class="f"><span>Genre</span><input class="t" id="p-genre" ${bind('project','','genre')} value="${esc(p.genre)}" placeholder="e.g. Literary thriller"></label>
+        <label class="f"><span>Theme</span><input class="t" id="p-theme" ${bind('project','','theme')} value="${esc(p.theme)}" placeholder="e.g. Loyalty costs more than betrayal"></label>
+        <label class="f"><span>Target word count</span><input class="t" id="p-target" type="number" min="0" step="1000" ${bind('project','','target')} value="${esc(p.target)}" placeholder="80000"></label>
+      </div>
+    </div>
+  </section>
+  <section class="block">
+    <header><h2>Character arcs</h2><p>A filled dot means that beat is written. Scene names show where the beat lands.</p></header>
+    <div class="body">${matrix}</div>
+  </section>
+  <section class="block">
+    <header><h2>Compile</h2><p>Export the whole plan (characters, arcs, acts, scenes, flash parts and drafts) as one Markdown file.</p></header>
+    <div class="body"><div class="row">
+      <button class="btn primary" data-act="compile">Compile outline (.md)</button>
+      ${mode==='local'?`<button class="btn" data-act="backup">Back up (.json)</button>
+      <label class="btn" for="restore-file">Restore backup</label><input type="file" id="restore-file" accept=".json,application/json" hidden>`:''}
+      <span class="spacer"></span>
+      <button class="btn danger" data-act="wipe">Delete everything and start fresh</button>
+    </div></div>
+  </section>`;
+}
+
+/* ---------- characters ---------- */
+function vCharacters(){
+  const cs=chars();
+  const col=r=>{const list=cs.filter(c=>c.role===r),R=ROLES[r];
+    return `<div class="rolecol"><div class="rolehead">${shape(R.shape,R.col)}<h2>${R.label}</h2><button class="ico" data-act="add-char" data-role="${r}" aria-label="${R.add}">+</button></div>
+    ${list.length?list.map(c=>`<button class="ccard" data-go="character" data-id="${c.id}">${shape(R.shape,R.col)}<span><b>${esc(c.name||'Unnamed')}</b><span>${esc(c.tagline||'No description yet')}</span></span></button>`).join('')
+      :`<div class="empty">${r==='main'?'The people whose arcs carry the book.':r==='sub'?'Allies, rivals and mentors who shape the main characters.':'Walk-on roles: the cabbie, the clerk, the voice on the phone.'}<button class="btn sm" data-act="add-char" data-role="${r}">${R.add}</button></div>`}</div>`};
+  return `<div class="eyebrow">Characters</div><h1 class="bigtitle">Cast</h1><div class="rolecols">${col('main')}${col('sub')}${col('bit')}</div>`;
+}
+function vCharacter(id){
+  const c=model.characters[id],R=ROLES[c.role]||ROLES.bit;
+  const opts=sel=>`<option value="">No scene linked</option>`+ACTS.map((a,i)=>{const s=scenesIn(i);return s.length?`<optgroup label="${a.name}">${s.map((x,j)=>`<option value="${x.id}"${x.id===sel?' selected':''}>${j+1}. ${esc(x.title||'Untitled scene')}</option>`).join('')}</optgroup>`:''}).join('');
+  const learned=allScenes().filter(s=>s.learn&&s.learn[id]&&s.learn[id].trim());
+  const inScenes=allScenes().filter(s=>(s.cast||[]).includes(id)||s.pov===id);
+  let h=`<div class="eyebrow"><a data-go="characters">Characters</a> / ${R.one}</div>
+  <input class="bigtitle" id="c-name" placeholder="Character name" value="${esc(c.name)}" ${bind('characters',id,'name')} aria-label="Character name">
+  <div class="rolepick" role="group" aria-label="Role">${Object.entries(ROLES).map(([k,r])=>`<button data-act="set-role" data-role="${k}" aria-pressed="${c.role===k}">${shape(r.shape,r.col)}${r.one}</button>`).join('')}</div>
+  <section class="block"><header><h2>Profile</h2></header><div class="body">
+    <label class="f"><span>One-line description</span><input class="t" id="c-tag" ${bind('characters',id,'tagline')} value="${esc(c.tagline)}" placeholder="A retired cartographer who still maps the city at night"></label>`;
+  if(c.role==='main')h+=`<div class="cols">
+      <label class="f"><span>Want (external goal)</span><textarea class="t" id="c-want" ${bind('characters',id,'want')} placeholder="What they are chasing">${esc(c.want)}</textarea></label>
+      <label class="f"><span>Need (inner truth)</span><textarea class="t" id="c-need" ${bind('characters',id,'need')} placeholder="What they must learn">${esc(c.need)}</textarea></label>
+      <label class="f"><span>Flaw or lie</span><textarea class="t" id="c-flaw" ${bind('characters',id,'flaw')} placeholder="What holds them back">${esc(c.flaw)}</textarea></label></div>`;
+  else h+=`<label class="f"><span>${c.role==='sub'?'Role in the story and link to the main cast':'Purpose in the scene'}</span><textarea class="t" id="c-purpose" ${bind('characters',id,'purpose')} placeholder="${c.role==='sub'?'e.g. Mentor to Ada, then betrays her in the climax':'e.g. Delivers the letter that starts Act II'}">${esc(c.purpose)}</textarea></label>`;
+  h+=`<label class="f"><span>Notes: appearance, voice, history</span><textarea class="t" id="c-notes" ${bind('characters',id,'notes')}>${esc(c.notes)}</textarea></label></div></section>`;
+  if(c.role==='main'){
+    const arc=c.arc||[];
+    h+=`<section class="block"><header><h2>Five-point character arc</h2><p>Plot the change from flaw to transformation. Link each beat to the scene where it happens.</p></header>
+    <svg class="arcline" viewBox="0 0 500 56" preserveAspectRatio="none" aria-hidden="true"><polyline points="50,48 150,36 250,8 350,30 450,18" fill="none" stroke="var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/>${[[50,48,'--blue'],[150,36,'--yellow'],[250,8,'--red'],[350,30,'--ink'],[450,18,'--blue']].map(([x,y,c])=>`<circle cx="${x}" cy="${y}" r="5" fill="var(${c})"/>`).join('')}</svg>
+    <div class="arc">${ARC.map((b,i)=>`<div class="beat"><span class="bn">${i+1}</span><h3>${b.name}</h3><p>${b.hint}</p>
+      <textarea class="t" id="arc-${i}" ${bind('characters',id,`arc.${i}.note`)} aria-label="${b.name}">${esc((arc[i]||{}).note)}</textarea>
+      <select class="t" id="arcs-${i}" ${bind('characters',id,`arc.${i}.sceneId`)} aria-label="Scene for ${b.name}">${opts((arc[i]||{}).sceneId)}</select></div>`).join('')}</div></section>
+    <section class="block"><header><h2>What ${esc(c.name||'they')} learns, scene by scene</h2><p>Collected from each scene's “What the main characters learn” notes.</p></header><div class="body">
+      ${learned.length?`<div class="learnlist">${learned.map(s=>`<div class="li"><div><small>${ACTS[s.act].name}</small><a data-go="scene" data-id="${s.id}">${esc(s.title||'Untitled scene')}</a></div><div>${esc(s.learn[id])}</div></div>`).join('')}</div>`:`<p class="hint">Nothing recorded yet. Open a scene and fill in what ${esc(c.name||'this character')} learns.</p>`}
+    </div></section>`;
+  } else {
+    h+=`<section class="block"><header><h2>Appears in</h2></header><div class="body">${inScenes.length?`<div class="chips">${inScenes.map(s=>`<button class="chip" data-go="scene" data-id="${s.id}">${shape(ACTS[s.act].shape,ACTS[s.act].col)}${esc(s.title||'Untitled scene')}</button>`).join('')}</div>`:`<p class="hint">Not in any scene yet. Add them to a scene's cast.</p>`}</div></section>`;
+  }
+  h+=`<div class="row"><button class="btn danger" data-act="del-char" data-id="${id}">Delete character</button></div>`;
+  return h;
+}
+
+/* ---------- act corkboard ---------- */
+function vAct(a){
+  const A=ACTS[a],sc=scenesIn(a),cs=model.characters;
+  const fg=a===1?'var(--on-y)':a===3?'var(--paper)':'var(--on-c)';
+  return `<div class="eyebrow">Act ${['I','II','III','IV','V'][a]} of V</div>
+  <section class="block a${a}"><div class="actband" style="color:${fg}"><i class="shp ${A.shape}" aria-hidden="true"></i><div><div class="big">${A.name}</div><p>${A.hint}</p></div></div></section>
+  <div class="board">${sc.map((s,j)=>`<article class="card">
+    <div class="top"><span class="no">${j+1}</span><span class="pill st${s.status||0}">${STATUS[s.status||0]}</span><span class="spacer"></span>
+      <button class="ico" data-act="move" data-id="${s.id}" data-dir="-1" ${j===0?'disabled':''} aria-label="Move earlier">←</button>
+      <button class="ico" data-act="move" data-id="${s.id}" data-dir="1" ${j===sc.length-1?'disabled':''} aria-label="Move later">→</button></div>
+    <button class="open" data-go="scene" data-id="${s.id}"><b>${esc(s.title||'Untitled scene')}</b><span>${esc(s.summary||s.plot||'No synopsis yet.')}</span></button>
+    <div class="meta">${s.pov&&cs[s.pov]?`<span>POV ${esc(cs[s.pov].name)}</span>`:''}<span>${(s.flash||[]).length} flash</span><span>${fmt(sceneWords(s))} w</span>${s.location?`<span>${esc(s.location)}</span>`:''}</div>
+  </article>`).join('')}
+  <button class="addcard" data-act="add-scene" data-id="${a}"><span><span class="plus">+</span>New scene in ${A.name}</span></button></div>`;
+}
+
+/* ---------- scene ---------- */
+function vScene(id){
+  const s=model.scenes[id],A=ACTS[s.act],list=scenesIn(s.act),idx=list.findIndex(x=>x.id===id);
+  const flat=allScenes(),fi=flat.findIndex(x=>x.id===id),prev=flat[fi-1],next=flat[fi+1];
+  const cs=chars(),ms=mains(),cast=s.cast||[],learn=s.learn||{};
+  const sec=(n,cls,title,hint)=>`<header><span class="secno a${cls}">${n}</span><h2>${title}</h2>${hint?`<p>${hint}</p>`:''}</header>`;
+  let h=`<div class="eyebrow"><a data-go="act" data-id="${s.act}">${A.name}</a> / Scene ${idx+1} of ${list.length}</div>
+  <input class="bigtitle" id="s-title" placeholder="Scene title" value="${esc(s.title)}" ${bind('scenes',id,'title')} aria-label="Scene title">
+  <section class="block"><div class="body">
+    <label class="f"><span>Synopsis (index card)</span><textarea class="t" id="s-summary" ${bind('scenes',id,'summary')} placeholder="What happens, in two or three lines.">${esc(s.summary)}</textarea></label>
+    <div class="cols">
+      <label class="f"><span>Status</span><select class="t" id="s-status" data-change="scenes|${id}|status">${STATUS.map((x,i)=>`<option value="${i}"${(s.status||0)==i?' selected':''}>${x}</option>`).join('')}</select></label>
+      <label class="f"><span>Point of view</span><select class="t" id="s-pov" data-change="scenes|${id}|pov"><option value="">None set</option>${cs.map(c=>`<option value="${c.id}"${s.pov===c.id?' selected':''}>${esc(c.name||'Unnamed')}</option>`).join('')}</select></label>
+      <label class="f"><span>Act</span><select class="t" id="s-act" data-act-move="${id}">${ACTS.map((x,i)=>`<option value="${i}"${s.act===i?' selected':''}>${x.name}</option>`).join('')}</select></label>
+    </div>
+    <div class="f"><label class="f"><span>Cast in this scene</span></label>${cs.length?`<div class="chips">${cs.map(c=>`<button class="chip" data-act="cast" data-id="${c.id}" aria-pressed="${cast.includes(c.id)}">${shape(ROLES[c.role].shape,ROLES[c.role].col)}${esc(c.name||'Unnamed')}</button>`).join('')}</div>`:`<p class="hint">No characters yet. <a data-go="characters" style="cursor:pointer;text-decoration:underline">Add your cast</a>.</p>`}</div>
+  </div></section>
+
+  <section class="block">${sec(1,0,'Scene details','Where and when this happens, and the world-building the reader needs here.')}<div class="body">
+    <label class="f"><span>Location</span><input class="t" id="s-loc" ${bind('scenes',id,'location')} value="${esc(s.location)}" placeholder="e.g. The flooded archive beneath the cathedral, night"></label>
+    <label class="f"><span>World-building notes</span><textarea class="t" id="s-world" ${bind('scenes',id,'world')} placeholder="Sensory detail, history, rules of the world, weather, time of day.">${esc(s.world)}</textarea></label>
+  </div></section>
+
+  <section class="block">${sec(2,2,'What the main characters learn','Each note also appears on that character\'s page.')}<div class="body">
+    ${ms.length?ms.map(c=>`<div class="learn"><div class="who">${shape('circ','c-red')}<span>${esc(c.name||'Unnamed')}</span></div><textarea class="t" id="l-${c.id}" ${bind('scenes',id,'learn.'+c.id)} aria-label="What ${esc(c.name)} learns" placeholder="What do they discover, admit or misunderstand?">${esc(learn[c.id])}</textarea></div>`).join('')
+      :`<p class="hint">Add a main character to record what they learn in each scene.</p>`}
+  </div></section>
+
+  <section class="block">${sec(3,1,'Cause and effect','What sets this scene in motion, and what it sets in motion.')}<div class="body">
+    <div class="ce"><label class="f"><span>Cause</span><textarea class="t" id="s-cause" ${bind('scenes',id,'cause')} placeholder="Because…">${esc(s.cause)}</textarea></label>
+    <span class="arrow" aria-hidden="true">→</span>
+    <label class="f"><span>Effect</span><textarea class="t" id="s-effect" ${bind('scenes',id,'effect')} placeholder="Therefore…">${esc(s.effect)}</textarea></label></div>
+  </div></section>
+
+  <section class="block">${sec(4,3,'Plot progression','How does this scene move the story forward? If nothing changes, consider cutting it.')}<div class="body">
+    <textarea class="t" id="s-plot" ${bind('scenes',id,'plot')} aria-label="Plot progression">${esc(s.plot)}</textarea>
+  </div></section>
+
+  <section class="block"><header><span class="bolt" aria-hidden="true"></span><h2>Flash parts</h2><span class="spacer"></span><button class="btn sm primary" data-act="add-flash">Add flash part</button><p>Break the scene into beats: each part is one action and its consequence.</p></header><div class="body">
+    ${(s.flash||[]).length?(s.flash||[]).map((f,i,arr)=>`<div class="flash">
+      <div class="fh"><span class="bolt" aria-hidden="true"></span><b>Part ${i+1}</b><span class="spacer"></span>
+        <button class="ico" data-act="fmove" data-i="${i}" data-dir="-1" ${i===0?'disabled':''} aria-label="Move part up">↑</button>
+        <button class="ico" data-act="fmove" data-i="${i}" data-dir="1" ${i===arr.length-1?'disabled':''} aria-label="Move part down">↓</button>
+        <button class="btn sm danger" data-act="fdel" data-i="${i}">Delete</button></div>
+      <div class="fb">
+        <label class="f"><span>Action</span><textarea class="t" id="f-${f.id}-a" ${bind('scenes',id,`flash.${i}.action`)} placeholder="What physically happens.">${esc(f.action)}</textarea></label>
+        <div class="ce"><label class="f"><span>Cause</span><textarea class="t" id="f-${f.id}-c" ${bind('scenes',id,`flash.${i}.cause`)}>${esc(f.cause)}</textarea></label><span class="arrow" aria-hidden="true">→</span>
+        <label class="f"><span>Effect</span><textarea class="t" id="f-${f.id}-e" ${bind('scenes',id,`flash.${i}.effect`)}>${esc(f.effect)}</textarea></label></div>
+        <div class="cols">
+          <label class="f"><span>How it progresses the story</span><textarea class="t" id="f-${f.id}-p" ${bind('scenes',id,`flash.${i}.progress`)}>${esc(f.progress)}</textarea></label>
+          <label class="f"><span>Influence on main character arcs</span><textarea class="t" id="f-${f.id}-r" ${bind('scenes',id,`flash.${i}.arcs`)} placeholder="Which arc beat does this push, and which way?">${esc(f.arcs)}</textarea></label>
+        </div>
+      </div></div>`).join(''):`<div class="empty">No flash parts yet. Split the scene into its key moments.</div>`}
+  </div></section>
+
+  <details class="block draft" id="draft-${id}" ${s.draftOpen?'open':''}>
+    <summary><h2>Draft</h2><span class="wc" id="wc">${fmt(sceneWords(s))} words</span><span class="spacer"></span><span class="tog">Write the scene's prose here</span></summary>
+    <div class="body"><textarea class="t prose" id="s-draft" ${bind('scenes',id,'draft')} placeholder="Start writing…">${esc(s.draft)}</textarea></div>
+  </details>
+
+  <div class="pager">
+    ${prev?`<button class="btn" data-go="scene" data-id="${prev.id}">← ${esc(prev.title||'Previous scene')}</button>`:'<span></span>'}
+    <button class="btn danger" data-act="del-scene" data-id="${id}">Delete scene</button>
+    ${next?`<button class="btn" data-go="scene" data-id="${next.id}">${esc(next.title||'Next scene')} →</button>`:'<span></span>'}
+  </div>`;
+  return h;
+}
+
+/* ---------- mutations ---------- */
+function setPath(obj,path,val){
+  const ks=path.split('.');let o=obj;
+  for(let i=0;i<ks.length-1;i++){const k=ks[i],nk=ks[i+1];if(o[k]==null)o[k]=/^\d+$/.test(nk)?[]:{};o=o[k]}
+  o[ks[ks.length-1]]=val;
+}
+function target(col,id){if(col==='project')return model.project;return model[col][id]}
+function guard(){if(readOnly){toast('You can view this novel but not change it.');return true}return false}
+function newChar(role){const id=uid('c');model.characters[id]={name:'',role,created:Date.now(),arc:role==='main'?ARC.map(()=>({note:'',sceneId:''})):[]};touch('characters',id);go({type:'character',id});setTimeout(()=>$('#c-name')&&$('#c-name').focus(),30)}
+function newScene(a){const sc=scenesIn(a);const id=uid('s');model.scenes[id]={act:a,order:sc.length?Math.max(...sc.map(s=>s.order||0))+1:1,title:'',status:0,cast:[],learn:{},flash:[],created:Date.now()};touch('scenes',id);go({type:'scene',id});setTimeout(()=>$('#s-title')&&$('#s-title').focus(),30)}
+function arm(btn){if(btn.dataset.armed)return true;btn.dataset.armed='1';btn.dataset.txt=btn.textContent;btn.textContent='Click again to confirm';setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=btn.dataset.txt}},3500);return false}
+
+let binderT;
+document.addEventListener('input',e=>{
+  const el=e.target,b=el.dataset&&el.dataset.bind;if(!b)return;
+  if(guard())return;
+  const [col,id,path]=b.split('|');const t=target(col,id);if(!t)return;
+  let v=el.value;if(path==='target')v=v===''?'':+v;
+  setPath(t,path,v);touch(col,id);
+  if(el.tagName==='TEXTAREA')grow(el);
+  if(path==='draft'){const w=$('#wc');if(w)w.textContent=fmt(words(v))+' words'}
+  if(path==='title'||path==='name'){clearTimeout(binderT);binderT=setTimeout(renderBinder,200)}
+});
+document.addEventListener('change',e=>{
+  const el=e.target;
+  if(el.id==='restore-file'){if(el.files[0])restore(el.files[0]);el.value='';return}
+  if(guard())return;
+  if(el.dataset.bind&&el.tagName==='SELECT'){const [col,id,path]=el.dataset.bind.split('|');setPath(target(col,id),path,el.value);touch(col,id);el.blur();refresh();return}
+  if(el.dataset.change){const [col,id,path]=el.dataset.change.split('|');target(col,id)[path]=path==='status'?+el.value:el.value;touch(col,id);el.blur();renderAll();return}
+  if(el.dataset.actMove){const id=el.dataset.actMove,s=model.scenes[id],a=+el.value,sc=scenesIn(a).filter(x=>x.id!==id);s.act=a;s.order=sc.length?Math.max(...sc.map(x=>x.order||0))+1:1;touch('scenes',id);el.blur();renderAll();toast(`Moved to the end of ${ACTS[a].name}`)}
+});
+document.addEventListener('toggle',e=>{const d=e.target;if(d.id&&d.id.startsWith('draft-')){const s=model.scenes[d.id.slice(6)];if(s&&!!s.draftOpen!==d.open){s.draftOpen=d.open;touch('scenes',d.id.slice(6))}}},true);
+document.addEventListener('click',async e=>{
+  const g=e.target.closest('[data-go]');
+  if(g){const t=g.dataset.go;go(t==='act'?{type:t,id:+g.dataset.id}:g.dataset.id?{type:t,id:g.dataset.id}:{type:t});return}
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act;
+  if(a==='nav'){$('#binder').classList.toggle('open');renderBinder();return}
+  if(a==='compile'){compile();return}
+  if(a==='backup'){backup();return}
+  if(guard())return;
+  if(a==='add-char')newChar(b.dataset.role);
+  else if(a==='add-scene')newScene(+b.dataset.id);
+  else if(a==='set-role'){const c=model.characters[view.id];c.role=b.dataset.role;if(c.role==='main'&&!(c.arc||[]).length)c.arc=ARC.map(()=>({note:'',sceneId:''}));touch('characters',view.id);renderAll()}
+  else if(a==='del-char'){if(!arm(b))return;const id=b.dataset.id;
+    for(const [sid,s] of Object.entries(model.scenes)){let ch=false;if((s.cast||[]).includes(id)){s.cast=s.cast.filter(x=>x!==id);ch=true}if(s.pov===id){s.pov='';ch=true}if(s.learn&&id in s.learn){delete s.learn[id];ch=true}if(ch)touch('scenes',sid)}
+    remove('characters',id);go({type:'characters'});toast('Character deleted')}
+  else if(a==='del-scene'){if(!arm(b))return;const id=b.dataset.id,act=model.scenes[id].act;
+    for(const [cid,c] of Object.entries(model.characters)){let ch=false;(c.arc||[]).forEach(x=>{if(x&&x.sceneId===id){x.sceneId='';ch=true}});if(ch)touch('characters',cid)}
+    remove('scenes',id);go({type:'act',id:act});toast('Scene deleted')}
+  else if(a==='move'){const s=model.scenes[b.dataset.id],sc=scenesIn(s.act),i=sc.findIndex(x=>x.id===b.dataset.id),j=i+ +b.dataset.dir;if(j<0||j>=sc.length)return;
+    sc.forEach((x,k)=>model.scenes[x.id].order=k+1);const o=sc[j].id;[model.scenes[o].order,s.order]=[s.order,model.scenes[o].order];
+    sc.forEach(x=>touch('scenes',x.id));renderAll()}
+  else if(a==='cast'){const s=model.scenes[view.id],c=b.dataset.id;s.cast=s.cast||[];s.cast=s.cast.includes(c)?s.cast.filter(x=>x!==c):[...s.cast,c];b.setAttribute('aria-pressed',s.cast.includes(c));touch('scenes',view.id)}
+  else if(a==='add-flash'){const s=model.scenes[view.id];s.flash=s.flash||[];s.flash.push({id:uid('f'),action:'',cause:'',effect:'',progress:'',arcs:''});touch('scenes',view.id);renderMain();const f=s.flash[s.flash.length-1];setTimeout(()=>{const el=$('#f-'+f.id+'-a');if(el){el.focus();el.scrollIntoView({block:'center'})}},30)}
+  else if(a==='fmove'){const s=model.scenes[view.id],i=+b.dataset.i,j=i+ +b.dataset.dir;[s.flash[i],s.flash[j]]=[s.flash[j],s.flash[i]];touch('scenes',view.id);renderMain()}
+  else if(a==='fdel'){if(!arm(b))return;const s=model.scenes[view.id];s.flash.splice(+b.dataset.i,1);touch('scenes',view.id);renderMain()}
+  else if(a==='wipe'){if(!arm(b))return;Object.keys(model.characters).forEach(id=>remove('characters',id));Object.keys(model.scenes).forEach(id=>remove('scenes',id));model.project={};touch('project');go({type:'project'});toast('Everything deleted. A clean page.')}
+});
+
+/* ---------- files (standalone mode) ---------- */
+function saveBlob(filename,text,type){
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=filename;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+function backup(){
+  const name=(model.project.title||'novel').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-').toLowerCase()||'novel';
+  saveBlob(`${name}-backup-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({werkbuch:1,...model},null,2),'application/json');
+}
+function restore(file){
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||d.werkbuch!==1)throw 0;
+      model.project=d.project||{};model.characters=d.characters||{};model.scenes=d.scenes||{};
+      saveLocal();go({type:'project'});toast('Backup restored.')}
+    catch{toast('That file is not a Werkbuch backup. Choose a .json file made with Back up.')}};
+  r.readAsText(file);
+}
+
+/* ---------- compile ---------- */
+function compile(){
+  const p=model.project,L=[];const q=(k,v)=>{if(v&&String(v).trim())L.push(`**${k}:** ${String(v).trim()}`,'')};
+  L.push(`# ${p.title||'Untitled novel'}`,'');q('Genre',p.genre);q('Theme',p.theme);q('Premise',p.premise);
+  L.push('## Characters','');
+  for(const r of ['main','sub','bit']){const list=chars().filter(c=>c.role===r);if(!list.length)continue;L.push(`### ${ROLES[r].label}`,'');
+    for(const c of list){L.push(`#### ${c.name||'Unnamed'}`,'');q('Description',c.tagline);q('Want',c.want);q('Need',c.need);q('Flaw',c.flaw);q('Role',c.purpose);q('Notes',c.notes);
+      if(r==='main')ARC.forEach((b,i)=>{const x=(c.arc||[])[i]||{};if(x.note||x.sceneId)L.push(`${i+1}. **${b.name}**${x.sceneId&&model.scenes[x.sceneId]?` (${sceneLabel(x.sceneId)})`:''}: ${x.note||''}`)});L.push('')}}
+  ACTS.forEach((A,a)=>{L.push(`## Act ${['I','II','III','IV','V'][a]}: ${A.name}`,'');
+    scenesIn(a).forEach((s,j)=>{L.push(`### Scene ${j+1}: ${s.title||'Untitled scene'}`,'');L.push(`*${STATUS[s.status||0]}${s.pov&&model.characters[s.pov]?` · POV ${model.characters[s.pov].name}`:''}*`,'');
+      q('Synopsis',s.summary);q('Location',s.location);q('World-building',s.world);
+      for(const c of mains())q(`${c.name||'Unnamed'} learns`,(s.learn||{})[c.id]);
+      q('Cause',s.cause);q('Effect',s.effect);q('Plot progression',s.plot);
+      (s.flash||[]).forEach((f,i)=>{L.push(`#### Flash part ${i+1}`,'');q('Action',f.action);q('Cause',f.cause);q('Effect',f.effect);q('Story progression',f.progress);q('Arc influence',f.arcs)});
+      if(s.draft&&s.draft.trim())L.push('#### Draft','',s.draft.trim(),'');
+    })});
+  const md=L.join('\n'),name=(p.title||'novel').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-').toLowerCase()||'novel';
+  if(!downloads){saveBlob(name+'-outline.md',md,'text/markdown');return}
+  downloads.save({filename:name+'-outline.md',data:md}).then(()=>toast('Outline saved.'),e=>{if(e&&e.code!=='declined')toast('The outline could not be saved here. Try again in a moment.')});
+}
+
+boot();
+</script>
+
+</body>
+</html>
