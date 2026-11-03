@@ -1,0 +1,847 @@
+{
+ "werkbuch": 1,
+ "project": {
+  "genre": "Science fantasy",
+  "premise": "The demon Queen Miro rules the Parallax, the only network connecting the worlds of the Ultraverse, and her daughters are the sword she uses to keep everyone in line. Hija has had enough of being her mother's eternal blade. Book one, Escape: she breaks free of Hël and is hunted across the Ultraverse by her sisters.",
+  "target": 50000,
+  "theme": "Daughter. What is that, a role? Freedom and identity against a mother's empire.",
+  "title": "Hija: Daughter of None"
+ },
+ "characters": {
+  "cBabaYo": {
+   "arc": [],
+   "created": 18,
+   "name": "Baba Yo",
+   "notes": "",
+   "purpose": "Gives Hija a prophecy later in the series. The Lost Boy's mother. A series viewpoint character.",
+   "role": "sub",
+   "tagline": "The witch."
+  },
+  "cBalliol": {
+   "arc": [],
+   "created": 21,
+   "name": "Balliol",
+   "notes": "",
+   "purpose": "Member of Hija's crew.",
+   "role": "sub",
+   "tagline": "An armoured tusk toad from Wetts."
+  },
+  "cDatter": {
+   "arc": [],
+   "created": 14,
+   "name": "Datter",
+   "notes": "",
+   "purpose": "One of Miro's daughters hunting Hija.",
+   "role": "sub",
+   "tagline": "A stone-cold killer. Emotionless."
+  },
+  "cDcera": {
+   "arc": [],
+   "created": 13,
+   "name": "Dcera",
+   "notes": "",
+   "purpose": "One of Miro's daughters hunting Hija.",
+   "role": "sub",
+   "tagline": "The most princessish. Prissy. Selfish."
+  },
+  "cFilha": {
+   "arc": [
+    {
+     "note": "Days away from getting her Parallax wings. Hija is terrified she will become like her.",
+     "sceneId": "s1_1"
+    },
+    {
+     "note": "Her coming-of-age ceremony.",
+     "sceneId": "s2_4"
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    }
+   ],
+   "created": 3,
+   "flaw": "",
+   "name": "Filha",
+   "need": "",
+   "notes": "From the same world as Hija, though with clear ethnic differences. Sweary, sassy, smokes, but fair. In six days she gets her Parallax wings. Viewpoint character.",
+   "role": "main",
+   "tagline": "Hija's little sister and the only one from the same world as her.",
+   "want": ""
+  },
+  "cFilhaMate": {
+   "arc": [],
+   "created": 30,
+   "name": "Filha's mate",
+   "notes": "",
+   "purpose": "She will eat his entrails after she has taken his seed.",
+   "role": "bit",
+   "tagline": "Chosen at Filha's coming of age."
+  },
+  "cGuards": {
+   "arc": [],
+   "created": 31,
+   "name": "Hël guards",
+   "notes": "",
+   "purpose": "Guards, guards: the escape goes wrong.",
+   "role": "bit",
+   "tagline": "Miro's guards."
+  },
+  "cHija": {
+   "arc": [
+    {
+     "note": "Miro's eternal blade, but weaker and slower than her sisters and knocked about by them. Smart, well trained and nurturing. Wants to be free.",
+     "sceneId": "s1_1"
+    },
+    {
+     "note": "Punished and given the task of catching the villain.",
+     "sceneId": "s1_3"
+    },
+    {
+     "note": "Catches the villain, but has glimpsed freedom. She starts planning treason.",
+     "sceneId": "s3_1"
+    },
+    {
+     "note": "Hunted by her sisters, tracked and cornered. The Lost Boy looks set to kill her, then helps her out of the scrape.",
+     "sceneId": "s4_5"
+    },
+    {
+     "note": "Learns the secret of the sisters (stolen, chipped, controlled) and hacks her governor module, perhaps at the cost of a limb. A new hope in the Ultraverse.",
+     "sceneId": "s5_4"
+    }
+   ],
+   "created": 1,
+   "flaw": "Weaker and slower than her sisters, who knock her about. Still under her mother's control.",
+   "name": "Hija",
+   "need": "To find out who she is and where she comes from, and to learn that helping others travel the Parallax is how she fights back.",
+   "notes": "Alabaster white with coal-black fingers and markings like intricate tattoos. Taken from a far-flung world at birth, like all her sisters. Smart and well trained. Nurturing: looks after the younglings in the nursery and the elders in the pastures. The land of the dead makes her puke. Connects with the Parallax exceptionally well and rides its waves expertly; can even control the minds of others inside it (to an extent). Filha is the only sister from the same world as her. Viewpoint character.",
+   "role": "main",
+   "tagline": "Our hero. Miro's daughter who wants to stop being her mother's blade.",
+   "want": "To give up her position and live a free life in the beauty of the new-found worlds."
+  },
+  "cIlazki": {
+   "arc": [],
+   "created": 19,
+   "name": "Ilazki",
+   "notes": "",
+   "purpose": "Member of Hija's crew of inter-dimensional mercenaries.",
+   "role": "sub",
+   "tagline": "A moon warrior."
+  },
+  "cKci": {
+   "arc": [],
+   "created": 12,
+   "name": "Kći",
+   "notes": "",
+   "purpose": "One of Miro's daughters hunting Hija.",
+   "role": "sub",
+   "tagline": "Aloof and a bit of a bitch."
+  },
+  "cKizEvlat": {
+   "arc": [],
+   "created": 15,
+   "name": "Kız Evlat",
+   "notes": "",
+   "purpose": "One of Miro's daughters hunting Hija.",
+   "role": "sub",
+   "tagline": "Ethereal fairy princess. Sharp-toothed, evil and mischievous."
+  },
+  "cKori": {
+   "arc": [],
+   "created": 11,
+   "name": "Kóri",
+   "notes": "",
+   "purpose": "One of Miro's daughters hunting Hija. Her wrath shows at Filha's celebrations.",
+   "role": "sub",
+   "tagline": "Spirit-like and terrifying."
+  },
+  "cLoni": {
+   "arc": [],
+   "created": 20,
+   "name": "Loni",
+   "notes": "",
+   "purpose": "Member of Hija's crew.",
+   "role": "sub",
+   "tagline": "A blue mystic from the Razor Plains."
+  },
+  "cLostBoy": {
+   "arc": [
+    {
+     "note": "A legend and a terror: strange, godlike, feared.",
+     "sceneId": "s1_5"
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    },
+    {
+     "note": "Corners Hija and looks ready to kill her, then helps her out of a scrape. He has been watching over her all along.",
+     "sceneId": "s4_3"
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    }
+   ],
+   "created": 4,
+   "flaw": "",
+   "name": "The Lost Boy",
+   "need": "",
+   "notes": "Has been to Hël and back. Hides in weather. Strange and godlike; starts as a terror built on myth and fear. Has been looking out for Hija all along. Brother? Lover? Possible love interest. In the series, the witch Baba Yo is his mother. Viewpoint character.",
+   "role": "main",
+   "tagline": "A dark shadow who runs the Parallax. The only one who ever outwitted Miro.",
+   "want": ""
+  },
+  "cMiro": {
+   "arc": [
+    {
+     "note": "Unchallenged ruler of Hël who controls every pathway between worlds. Merciless and unforgiving.",
+     "sceneId": "s1_1"
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    },
+    {
+     "note": "",
+     "sceneId": ""
+    }
+   ],
+   "created": 2,
+   "flaw": "",
+   "name": "Miro",
+   "need": "",
+   "notes": "Ancient and eternal; has ruled Hël for longer than anyone can remember. Her personal power is immense: she's a god. Her nine daughters are the sword she wields. No transaction on Hël happens without a payment to Miro; her laws are followed to the letter and punishment is swift. Stole her daughters from Earth in different eras, then hid Earth away in a pocket (series secret). Viewpoint character.",
+   "role": "main",
+   "tagline": "The demon queen. Eternal deity warlord of Hël and Queen of the Parallax.",
+   "want": "Total control of the Parallax and the Ultraverse."
+  },
+  "cQiz": {
+   "arc": [],
+   "created": 10,
+   "name": "Qiz",
+   "notes": "",
+   "purpose": "One of Miro's daughters hunting Hija.",
+   "role": "sub",
+   "tagline": "The oldest sister. Proper terrifying. Very old."
+  },
+  "cSuzuki": {
+   "arc": [],
+   "created": 22,
+   "name": "Suzuki",
+   "notes": "",
+   "purpose": "Member of Hija's crew.",
+   "role": "sub",
+   "tagline": "A psych angel from the Nether."
+  },
+  "cTytar": {
+   "arc": [],
+   "created": 16,
+   "name": "Tytär",
+   "notes": "",
+   "purpose": "One of Miro's daughters hunting Hija.",
+   "role": "sub",
+   "tagline": "The youngest. Nice, but does as she's told."
+  },
+  "cVillain": {
+   "arc": [],
+   "created": 17,
+   "name": "The villain",
+   "notes": "Not named in the deck.",
+   "purpose": "Hija catches him and brings him back to Hël, then recruits him and escapes with him. He takes her to Loah. Enemy becomes friend.",
+   "role": "sub",
+   "tagline": "The fugitive Hija is sent to catch, who then escapes with her."
+  }
+ },
+ "scenes": {
+  "s1_1": {
+   "act": 0,
+   "cast": [
+    "cHija",
+    "cFilha",
+    "cMiro",
+    "cKori",
+    "cFilhaMate"
+   ],
+   "cause": "Filha's coming of age approaches.",
+   "created": 1,
+   "draft": "",
+   "effect": "",
+   "flash": [
+    {
+     "action": "In six days, Filha gets her wings. Hija loves her little sister and is terrified for her: terrified of what she'll become, terrified she'll become Hija.",
+     "arcs": "Hija's fear for Filha shows how much she hates what being a daughter has made her.",
+     "cause": "",
+     "effect": "",
+     "id": "f11a",
+     "progress": "Opening hook."
+    },
+    {
+     "action": "Pre-party celebrations begin. Filha will choose a mate, though she'll eat his entrails after she has taken his seed.",
+     "arcs": "",
+     "cause": "",
+     "effect": "",
+     "id": "f11b",
+     "progress": "A window on Hël's culture."
+    },
+    {
+     "action": "An audience with Miro, the omnipotent ruler of Hël. Queen of the Parallax.",
+     "arcs": "",
+     "cause": "",
+     "effect": "",
+     "id": "f11c",
+     "progress": "Introduces the antagonist."
+    },
+    {
+     "action": "Jealous sisters try to outdo each other at the games.",
+     "arcs": "",
+     "cause": "",
+     "effect": "",
+     "id": "f11d",
+     "progress": ""
+    },
+    {
+     "action": "Allegiances, grudges and the wrath of Kóri.",
+     "arcs": "",
+     "cause": "",
+     "effect": "",
+     "id": "f11e",
+     "progress": ""
+    }
+   ],
+   "learn": {},
+   "location": "Hël",
+   "order": 1,
+   "plot": "Opens on Hija's love and fear for her little sister, and sets up Miro's court and the sisters' rivalries.",
+   "pov": "cHija",
+   "status": 1,
+   "summary": "In six days Filha gets her Parallax wings. Pre-party celebrations, an audience with Miro, the sisters' games, and the wrath of Kóri.",
+   "title": "Welcome to Hël: Filha's coming of age",
+   "world": "A cold hell planet under a thick jet-black sky, veined by cracks of light from a sun no one sees. Freezing plains, lava pools and hot lakes. The landscape is made of fossil and bone from huge creatures of a previous age; bone and trophy shell from giant molluscs are mined. Earthquakes, volcanoes, tsunamis and typhoons. Bone cathedrals: lots of bones means life (and death). Eternal life is hard."
+  },
+  "s1_2": {
+   "act": 0,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 2,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "Hël",
+   "order": 2,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "There's a villain out there. Hija is not happy.",
+   "title": "A fly in the ointment",
+   "world": ""
+  },
+  "s1_3": {
+   "act": 0,
+   "cast": [
+    "cHija",
+    "cMiro"
+   ],
+   "cause": "Hija is being punished.",
+   "created": 3,
+   "draft": "",
+   "effect": "She is sent to catch the villain.",
+   "flash": [],
+   "learn": {},
+   "location": "Hël",
+   "order": 3,
+   "plot": "The call to adventure.",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "Hija is given the task of catching the villain.",
+   "title": "The punishment of Hija",
+   "world": ""
+  },
+  "s1_4": {
+   "act": 0,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 4,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 4,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "A glimpse of freedom",
+   "world": ""
+  },
+  "s1_5": {
+   "act": 0,
+   "cast": [
+    "cHija",
+    "cLostBoy"
+   ],
+   "cause": "",
+   "created": 5,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 5,
+   "plot": "Plants the Lost Boy as a terror before he appears.",
+   "pov": "",
+   "status": 0,
+   "summary": "The myth and fear of the Lost Boy: the only one who ever outwitted Miro.",
+   "title": "The legend of the Lost Boy",
+   "world": ""
+  },
+  "s2_1": {
+   "act": 1,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 6,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "The Parallax",
+   "order": 1,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Into the Parallax",
+   "world": "Running the Parallax is a feat of mind. The body is under immense pressure, but controlling it with the mind lets you step outside rational time and space. What you make up in there comes from the darkest places of your mind, and once it is real it is real for good: it's the stuff gods used to make worlds. Getting out where and when you want is a trick in itself."
+  },
+  "s2_2": {
+   "act": 1,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 7,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 2,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Out of the Parallax and into a world",
+   "world": ""
+  },
+  "s2_3": {
+   "act": 1,
+   "cast": [
+    "cHija",
+    "cVillain"
+   ],
+   "cause": "",
+   "created": 8,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 3,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Catch the villain and bring him back to Hël",
+   "world": ""
+  },
+  "s2_4": {
+   "act": 1,
+   "cast": [
+    "cFilha",
+    "cHija",
+    "cMiro"
+   ],
+   "cause": "",
+   "created": 9,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "Hël",
+   "order": 4,
+   "plot": "",
+   "pov": "cFilha",
+   "status": 0,
+   "summary": "Filha gets her Parallax wings.",
+   "title": "Filha's ceremony",
+   "world": ""
+  },
+  "s2_5": {
+   "act": 1,
+   "cast": [
+    "cVillain",
+    "cMiro"
+   ],
+   "cause": "",
+   "created": 10,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "Hël",
+   "order": 5,
+   "plot": "",
+   "pov": "",
+   "status": 0,
+   "summary": "",
+   "title": "Trial and sentence",
+   "world": ""
+  },
+  "s3_1": {
+   "act": 2,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 11,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "Hël",
+   "order": 1,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Planning treason",
+   "world": ""
+  },
+  "s3_2": {
+   "act": 2,
+   "cast": [
+    "cHija",
+    "cVillain"
+   ],
+   "cause": "",
+   "created": 12,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "Hël",
+   "order": 2,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Recruiting the villain",
+   "world": ""
+  },
+  "s3_3": {
+   "act": 2,
+   "cast": [
+    "cHija",
+    "cVillain"
+   ],
+   "cause": "",
+   "created": 13,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 3,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Escape with the villain",
+   "world": ""
+  },
+  "s3_4": {
+   "act": 2,
+   "cast": [
+    "cHija",
+    "cVillain"
+   ],
+   "cause": "Hija helped the villain escape.",
+   "created": 14,
+   "draft": "",
+   "effect": "He brings her to Loah.",
+   "flash": [],
+   "learn": {},
+   "location": "Loah",
+   "order": 4,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "The villain brings Hija to Loah. It's like being stranded on a desert island, until she realises she's not the only one hiding here. Coincidence, fate or design?",
+   "title": "Somewhere new",
+   "world": "A plant kingdom with no intelligent civilised life as we would know it, but the plants are pretty clever, and so are some insect-like hive-mind creatures. There's an underworld beneath the canopy."
+  },
+  "s3_5": {
+   "act": 2,
+   "cast": [
+    "cHija",
+    "cGuards"
+   ],
+   "cause": "",
+   "created": 15,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 5,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Guards, guards",
+   "world": ""
+  },
+  "s4_1": {
+   "act": 3,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 16,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 1,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Nowhere to run, nowhere to hide",
+   "world": ""
+  },
+  "s4_2": {
+   "act": 3,
+   "cast": [
+    "cMiro",
+    "cQiz",
+    "cKori",
+    "cKci",
+    "cDcera",
+    "cDatter",
+    "cKizEvlat",
+    "cTytar"
+   ],
+   "cause": "",
+   "created": 17,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 2,
+   "plot": "",
+   "pov": "",
+   "status": 0,
+   "summary": "Miro sends her daughters after Hija. If they are sent for you, there is nowhere in the Ultraverse you can hide.",
+   "title": "The sisters' bounty",
+   "world": ""
+  },
+  "s4_3": {
+   "act": 3,
+   "cast": [
+    "cHija",
+    "cLostBoy"
+   ],
+   "cause": "",
+   "created": 18,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {
+    "cHija": "The Lost Boy has been looking out for her all along."
+   },
+   "location": "Loah",
+   "order": 3,
+   "plot": "",
+   "pov": "cLostBoy",
+   "status": 0,
+   "summary": "The Lost Boy is on Loah too. He corners Hija and looks set to kill her, then helps her out of a scrape.",
+   "title": "The Lost Boy",
+   "world": ""
+  },
+  "s4_4": {
+   "act": 3,
+   "cast": [
+    "cHija",
+    "cLostBoy"
+   ],
+   "cause": "",
+   "created": 19,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 4,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "Sanctuary",
+   "world": ""
+  },
+  "s4_5": {
+   "act": 3,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "She's tracked.",
+   "created": 20,
+   "draft": "",
+   "effect": "She is cornered.",
+   "flash": [],
+   "learn": {
+    "cHija": "She is being tracked."
+   },
+   "location": "",
+   "order": 5,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "Hija is cornered because she is being tracked.",
+   "title": "Cornered",
+   "world": ""
+  },
+  "s5_1": {
+   "act": 4,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 21,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 1,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "A close call",
+   "world": ""
+  },
+  "s5_2": {
+   "act": 4,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 22,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "The Grand Library, Hël",
+   "order": 2,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "Who am I? Where am I from?",
+   "title": "The Grand Library in Hël",
+   "world": "Just an entrance on the surface. Everything is deep underground."
+  },
+  "s5_3": {
+   "act": 4,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 23,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {
+    "cHija": "She and her sisters were stolen, chipped and controlled by Miro."
+   },
+   "location": "",
+   "order": 3,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "The sisters were stolen, chipped and controlled.",
+   "title": "The secret of the sisters",
+   "world": ""
+  },
+  "s5_4": {
+   "act": 4,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 24,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 4,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "Hija hacks the module that controls her, perhaps sacrificing a limb.",
+   "title": "Hacking the governor module",
+   "world": ""
+  },
+  "s5_5": {
+   "act": 4,
+   "cast": [
+    "cHija"
+   ],
+   "cause": "",
+   "created": 25,
+   "draft": "",
+   "effect": "",
+   "flash": [],
+   "learn": {},
+   "location": "",
+   "order": 5,
+   "plot": "",
+   "pov": "cHija",
+   "status": 0,
+   "summary": "",
+   "title": "A new hope in the Ultraverse",
+   "world": ""
+  }
+ }
+}

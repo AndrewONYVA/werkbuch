@@ -331,7 +331,10 @@ function setSaving(){
   const busy=pending.size>0;el.textContent=busy?'Saving…':'Saved';el.className='savestate'+(busy?' busy':'');
 }
 function saveLocal(){try{localStorage.setItem('werkbuch-data',JSON.stringify(model))}catch{}}
-function loadLocal(){try{const d=JSON.parse(localStorage.getItem('werkbuch-data'));if(d){Object.assign(model,{project:d.project||{},characters:d.characters||{},scenes:d.scenes||{}})}}catch{}}
+function loadLocal(){try{const d=JSON.parse(localStorage.getItem('werkbuch-data'));if(d){Object.assign(model,{project:d.project||{},characters:d.characters||{},scenes:d.scenes||{}});return true}}catch{}return false}
+// First visit to the standalone site: start from the novel shipped beside the page, if there is one.
+async function loadStarter(){try{const r=await fetch('starter.json');if(!r.ok)return;const d=await r.json();
+  Object.assign(model,{project:d.project||{},characters:d.characters||{},scenes:d.scenes||{}});saveLocal()}catch{}}
 
 function editing(){const a=document.activeElement;return a&&$('#main').contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
 let refreshT;
@@ -347,7 +350,7 @@ async function boot(){
   let ns=null;
   try{ns=window.claude&&window.claude.use?await window.claude.use('db'):null}catch{ns=null}
   try{downloads=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch{downloads=null}
-  if(!ns){mode='local';loadLocal();renderAll();return}
+  if(!ns){mode='local';if(!loadLocal())await loadStarter();renderAll();return}
   db=ns;
   const seen={p:false,c:false,s:false};let confirmed={p:false,c:false,s:false};
   const timer=setTimeout(()=>{if(!(confirmed.p&&confirmed.c&&confirmed.s)){loadNote='Your novel is taking longer than usual to load. What you see may be out of date.';renderAll()}},10000);
